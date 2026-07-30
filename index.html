@@ -1,0 +1,2856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empower QLM - Warranty, CoPQ & Chargeback Module</title>
+  <style>
+    /* RESET & BASE STYLES */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    :root {
+      --bg-sidebar: #121927;
+      --bg-sidebar-hover: #1c2638;
+      --bg-sidebar-active: #243147;
+      --color-sidebar-text: #94a3b8;
+      --color-sidebar-heading: #e2e8f0;
+      --color-primary: #0284c7;
+      --color-primary-hover: #0369a1;
+      --color-success: #16a34a;
+      --color-success-bg: #dcfce7;
+      --color-warning: #ea580c;
+      --color-warning-bg: #ffedd5;
+      --color-info: #2563eb;
+      --color-info-bg: #dbeafe;
+      --color-border: #e2e8f0;
+      --bg-main: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    /* LAYOUT COMPONENTS */
+    #sidebar {
+      width: 240px;
+      background-color: var(--bg-sidebar);
+      color: var(--color-sidebar-text);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 20;
+      transition: width 0.2s ease;
+    }
+
+    #sidebar.collapsed {
+      width: 60px;
+    }
+
+    #sidebar .logo-container {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      background-color: #0b101b;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    #sidebar .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #10b981 0%, #0284c7 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    #sidebar.collapsed .logo-text {
+      display: none;
+    }
+
+    #sidebar .logo-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    #sidebar .logo-subtext {
+      font-size: 10px;
+      color: #10b981;
+      font-weight: 600;
+      display: block;
+      margin-top: -2px;
+    }
+
+    .nav-list {
+      list-style: none;
+      overflow-y: auto;
+      flex-grow: 1;
+      padding: 12px 0;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      color: var(--color-sidebar-text);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    .nav-link:hover {
+      background-color: var(--bg-sidebar-hover);
+      color: var(--color-sidebar-heading);
+    }
+
+    .nav-link.active {
+      background-color: var(--bg-sidebar-active);
+      color: #ffffff;
+      border-left: 4px solid #0284c7;
+    }
+
+    .nav-link .icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    #sidebar.collapsed .nav-text,
+    #sidebar.collapsed .chevron {
+      display: none;
+    }
+
+    .chevron {
+      margin-left: auto;
+      font-size: 10px;
+      transition: transform 0.2s;
+    }
+
+    .chevron.open {
+      transform: rotate(90deg);
+    }
+
+    .sub-menu {
+      background-color: #0d131f;
+      list-style: none;
+      display: none;
+      padding: 4px 0;
+    }
+
+    .sub-menu.open {
+      display: block;
+    }
+
+    .sub-menu .nav-link {
+      padding-left: 48px;
+      font-size: 12px;
+    }
+
+    .pct-input-no-spin::-webkit-outer-spin-button,
+    .pct-input-no-spin::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .pct-input-no-spin {
+      -moz-appearance: textfield;
+    }
+
+    /* MAIN CONTENT AREA */
+    #main-container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-color: #f1f5f9;
+    }
+
+    /* HEADER BAR */
+    #top-bar {
+      height: 52px;
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .breadcrumb .current {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .top-user-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .btn-icon {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      background-color: white;
+      transition: all 0.15s;
+    }
+
+    .btn-icon:hover {
+      background-color: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    /* MODULE WORKSPACE */
+    #workspace {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ACTION BAR / FILTER HEADER */
+    .action-header {
+      background-color: #ffffff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .action-left, .action-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background-color: #0284c7;
+      color: white;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s;
+      font-size: 12.5px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0369a1;
+    }
+
+    .btn-outline-primary {
+      background-color: #ffffff;
+      color: #0284c7;
+      border: 1px solid #0284c7;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+      font-size: 12.5px;
+    }
+
+    .btn-outline-primary:hover {
+      background-color: #f0f9ff;
+    }
+
+    .btn-success {
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+    }
+
+    .btn-success:hover {
+      background-color: #15803d;
+    }
+
+    .segmented-control {
+      display: flex;
+      background-color: #f1f5f9;
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .segmented-btn {
+      padding: 5px 12px;
+      border: none;
+      background: none;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .segmented-btn.active {
+      background-color: #ffffff;
+      color: #0284c7;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* SEARCH BAR */
+    .search-row {
+      background-color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-dropdown, .input-select, .input-text {
+      padding: 7px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 12.5px;
+      outline: none;
+      background-color: #ffffff;
+    }
+
+    .search-dropdown:focus, .input-select:focus, .input-text:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    .search-input-wrap {
+      flex-grow: 1;
+      position: relative;
+    }
+
+    .search-input-wrap input {
+      width: 100%;
+      padding-left: 32px;
+    }
+
+    .search-input-wrap .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+
+    /* CARDS & STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .stat-card {
+      background-color: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    .stat-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .stat-subtext {
+      font-size: 11px;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* TABLE SECTION */
+    .table-container {
+      background-color: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      max-height: calc(100vh - 280px);
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    table.data-table th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+      font-size: 11.5px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+      border-right: 1px solid #f1f5f9;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      text-transform: capitalize;
+    }
+
+    table.data-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      border-right: 1px solid #f8fafc;
+      color: #334155;
+      font-size: 12px;
+    }
+
+    table.data-table tbody tr:hover {
+      background-color: #f0f9ff;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .badge-green {
+      background-color: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-solid-green {
+      background-color: #16a34a;
+      color: white;
+    }
+
+    .badge-blue {
+      background-color: #dbeafe;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge-solid-blue {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .badge-orange {
+      background-color: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+
+    .badge-gray {
+      background-color: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* ACTION BUTTONS IN TABLE (Image 1 & Image 2 Reference) */
+    .btn-table-action {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      border-radius: 4px;
+      padding: 3px 6px;
+      cursor: pointer;
+      color: #475569;
+      margin-right: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-table-action:hover {
+      background-color: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .btn-tbl-orange {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid #f97316;
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: #ea580c;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .btn-tbl-orange:hover {
+      background-color: #fff7ed;
+      border-color: #ea580c;
+    }
+
+    .btn-tbl-green {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid #22c55e;
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: #16a34a;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .btn-tbl-green:hover {
+      background-color: #f0fdf4;
+      border-color: #16a34a;
+    }
+
+    .btn-tbl-blue-badge {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid #3b82f6;
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: #2563eb;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 0;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .btn-tbl-blue-badge:hover {
+      background-color: #eff6ff;
+    }
+    .btn-tbl-blue-badge .badge-dot-num {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #ef4444;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      border: 1px solid #ffffff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+
+    /* FOOTER PAGINATION */
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background-color: #ffffff;
+      border-top: 1px solid var(--color-border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* MULTI-SELECT DROPDOWN STYLES */
+    .multiselect-wrapper {
+      position: relative;
+      display: inline-block;
+      min-width: 220px;
+    }
+
+    .multiselect-trigger {
+      width: 100%;
+      padding: 6px 12px;
+      background: white;
+      border: 1px solid #0284c7;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      user-select: none;
+    }
+
+    .multiselect-trigger::after {
+      content: '▼';
+      font-size: 10px;
+      color: #0284c7;
+      margin-left: 8px;
+    }
+
+    .multiselect-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 240px;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      z-index: 200;
+      max-height: 260px;
+      overflow-y: auto;
+      display: none;
+      padding: 6px 0;
+    }
+
+    .multiselect-menu.show {
+      display: block;
+    }
+
+    .multiselect-header {
+      padding: 6px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .multiselect-header-btn {
+      color: #0284c7;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 0;
+    }
+
+    .multiselect-header-btn:hover {
+      text-decoration: underline;
+    }
+
+    .multiselect-option {
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #1e293b;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.12s ease;
+    }
+
+    .multiselect-option:hover {
+      background-color: #f0f9ff;
+    }
+
+    .multiselect-option input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: #0284c7;
+      cursor: pointer;
+    }
+
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn {
+      min-width: 28px;
+      height: 28px;
+      padding: 0 6px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .page-btn.active {
+      background-color: #0284c7;
+      color: white;
+      border-color: #0284c7;
+      font-weight: bold;
+    }
+
+    .page-btn:hover:not(.active) {
+      background-color: #f1f5f9;
+    }
+
+    /* MODAL / POPUP */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(15, 23, 42, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 680px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #f8fafc;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      background-color: #f8fafc;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* TOAST NOTIFICATIONS */
+    #toast-container {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      min-width: 280px;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast-info {
+      border-left: 4px solid #0284c7;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* SUPPLIER SUMMARY PANEL IN CHARGEBACK */
+    .supplier-summary-bar {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .summary-info-group {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .summary-metric {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-metric-label {
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-metric-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #38bdf8;
+    }
+
+    /* MODULE NAV TABS AT TOP OF CONTENT */
+    .module-nav-tabs {
+      display: flex;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 4px;
+      gap: 16px;
+    }
+
+    .module-tab {
+      padding: 8px 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      position: relative;
+      border: none;
+      background: none;
+    }
+
+    .module-tab.active {
+      color: #0284c7;
+    }
+
+    .module-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #0284c7;
+    }
+
+    /* RESPONSIVE HIDES */
+    @media (max-width: 768px) {
+      #sidebar {
+        position: fixed;
+        left: -240px;
+        height: 100%;
+      }
+      #sidebar.mobile-open {
+        left: 0;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-group.full-width {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT SIDEBAR MENU (Empower QLM) -->
+  <aside id="sidebar">
+    <div class="logo-container">
+      <div class="logo-icon">eQ</div>
+      <div>
+        <div class="logo-text">empower QLM</div>
+        <span class="logo-subtext">QUALITY LIFECYCLE</span>
+      </div>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a class="nav-link" id="nav-link-home" onclick="switchModule('warranty')">
+          <span class="icon">🏠</span>
+          <span class="nav-text">Home</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" id="nav-link-warranty" onclick="switchModule('warranty')">
+          <span class="icon">📦</span>
+          <span class="nav-text">Warranty</span>
+          <span class="chevron">›</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="nav-link-copq" onclick="toggleSubmenu('copq-submenu')">
+          <span class="icon">⚙️</span>
+          <span class="nav-text">CoPQ</span>
+          <span class="chevron open" id="copq-chevron">›</span>
+        </a>
+        <ul class="sub-menu open" id="copq-submenu">
+          <li>
+            <a class="nav-link" id="sublink-copq-elements" onclick="switchModule('copq-elements')">
+              <span class="nav-text">Elements</span>
+            </a>
+          </li>
+          <li>
+            <a class="nav-link" id="sublink-copq-chargebacks" onclick="switchModule('copq-chargebacks')">
+              <span class="nav-text">Chargeback Requests</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTAINER AREA -->
+  <main id="main-container">
+    <!-- TOP HEADER BAR -->
+    <header id="top-bar">
+      <div class="breadcrumb">
+        <button class="btn-icon" style="padding:4px 8px;" onclick="toggleSidebarMenu()">☰</button>
+        <span>🏠</span>
+        <span>›</span>
+        <span>Warranty</span>
+        <span>›</span>
+        <span class="current" id="breadcrumb-current">Claims</span>
+      </div>
+
+      <div class="top-user-actions">
+        <div class="user-pill">
+          <span>User: <strong>admin</strong></span>
+        </div>
+        <select class="input-select" style="padding: 4px 8px; font-size: 11px;">
+          <option>Select a Language</option>
+          <option selected>English (US)</option>
+          <option>German</option>
+        </select>
+        <button class="btn-icon" title="Accessibility">♿</button>
+        <button class="btn-icon" title="Audit Trail">🔀</button>
+        <button class="btn-icon" title="Bookmarks">🔖</button>
+        <button class="btn-icon" title="History">🕒</button>
+        <button class="btn-icon" title="Logout" style="color:#ef4444;">🚪</button>
+      </div>
+    </header>
+
+    <!-- MODULE WORKSPACE AREA -->
+    <section id="workspace">
+
+      <!-- ==================== VIEW 1: WARRANTY CLAIMS LISTING ==================== -->
+      <div id="view-warranty" class="module-view">
+        <!-- ACTION BAR -->
+        <div class="action-header">
+          <div class="action-left">
+            <button class="btn-outline-primary" onclick="openNewClaimModal()">
+              <span>+</span> Create New Claim
+            </button>
+            <button class="btn-icon" onclick="showToast('Cloud Import synchronized 3 new claims', 'info')">
+              <span>☁️</span> Import
+            </button>
+          </div>
+
+          <div class="action-right">
+            <div class="segmented-control">
+              <button class="segmented-btn active" onclick="filterBySegment('All', this)">All</button>
+              <button class="segmented-btn" onclick="filterBySegment('Internal', this)">Internal</button>
+              <button class="segmented-btn" onclick="filterBySegment('Supplier', this)">Supplier</button>
+            </div>
+            <button class="btn-primary" onclick="switchModule('chargeback')">
+              <span>💳</span> Initiate Chargeback
+            </button>
+          </div>
+        </div>
+
+        <!-- SEARCH AND FILTER ROW -->
+        <div class="search-row">
+          <select class="search-dropdown" id="search-column-select">
+            <option value="all">Select Column to Search...</option>
+            <option value="claimNumber">Claim/Issue Number</option>
+            <option value="customer">Customer</option>
+            <option value="customerPartNumber">Customer Part Number</option>
+            <option value="supplier">Supplier</option>
+            <option value="dealerName">Dealer Name</option>
+            <option value="claimStatus">Claim Status</option>
+          </select>
+
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="warranty-search-input" class="input-text" placeholder="Type keyword to search..." oninput="renderWarrantyTable()">
+          </div>
+
+          <button class="btn-icon" title="Filter Settings">
+            <span>🌪️</span>
+          </button>
+          <button class="btn-icon" onclick="clearWarrantyFilters()">
+            <span>❌</span> Clear Filter
+          </button>
+          <button class="btn-icon" title="Columns Visibility">
+            <span>📑</span>
+          </button>
+          <button class="btn-icon" title="Grid Settings">
+            <span>⚙️</span>
+          </button>
+        </div>
+
+        <!-- WARRANTY CLAIMS DATA TABLE -->
+        <div class="table-container">
+          <div class="table-scroll">
+            <table class="data-table" id="warranty-table">
+              <thead>
+                <tr>
+                  <th style="text-align: center;">Actions</th>
+                  <th>Claim Status</th>
+                  <th>Claim/Issue Number</th>
+                  <th>Complaint Reported Date</th>
+                  <th>Customer Part Number</th>
+                  <th>Part Detail</th>
+                  <th style="text-align: center;">Defect Quantity</th>
+                  <th>Dealer Name</th>
+                  <th>Supplier</th>
+                  <th>Supplier Code</th>
+                  <th>Action Status</th>
+                  <th style="text-align: right;">Total Claim amount</th>
+                  <th>Model</th>
+                  <th>Supplier Coordinators</th>
+                  <th style="text-align: center;">CoPQ Status</th>
+                  <th>Non-Conformity Status</th>
+                  <th style="text-align: center;">NC Required</th>
+                </tr>
+              </thead>
+              <tbody id="warranty-table-body">
+                <!-- Dynamically rendered JS rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- FOOTER PAGINATION -->
+          <div class="table-footer">
+            <div id="pagination-info">Showing 1 to 50 of 24580 records</div>
+            <div class="pagination-controls">
+              <button class="page-btn">«</button>
+              <button class="page-btn">‹</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">4</button>
+              <button class="page-btn">5</button>
+              <button class="page-btn">›</button>
+              <button class="page-btn">»</button>
+              <select class="input-select" style="padding: 2px 6px;">
+                <option>50</option>
+                <option>100</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== VIEW 2: COPQ ELEMENTS MODULE (IMAGE 2 MATCH) ==================== -->
+      <div id="view-copq-elements" class="module-view" style="display: none;">
+        
+        <!-- TOP TOOLBAR -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <button class="btn-primary" style="padding: 8px 16px; font-weight: 600; font-size: 13px;" onclick="openNewCopqModal()">
+            + Create New CoPQ
+          </button>
+          
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" style="padding: 6px 16px; font-size: 12px; font-weight: 600;" id="btn-segment-supplier" onclick="filterCopqElementsSegment('Supplier', this)">⚡ Supplier</button>
+            <button class="btn-outline-primary" style="padding: 6px 16px; font-size: 12px; font-weight: 600; background: white;" id="btn-segment-internal" onclick="filterCopqElementsSegment('Internal', this)">👤 Internal</button>
+          </div>
+        </div>
+
+        <!-- MY COPQ / ALL COPQ TABS -->
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button class="btn-primary" style="padding: 6px 16px; font-size: 12px; font-weight: 600;" id="tab-my-copq" onclick="switchCopqTab('my', this)">My CoPQ</button>
+          <button class="btn-outline-primary" style="padding: 6px 16px; font-size: 12px; font-weight: 600; background: white;" id="tab-all-copq" onclick="switchCopqTab('all', this)">All CoPQ</button>
+        </div>
+
+        <!-- SEARCH & FILTER ROW (IMAGE 2 MATCH) -->
+        <div class="search-row" style="margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 250px; display: flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; background: white;">
+            <input type="text" id="copq-elements-search" class="input-text" style="border: none; outline: none; box-shadow: none; width: 100%;" placeholder="Select Column to Search..." oninput="renderCoPQElementsTable()">
+            <button class="btn-icon" style="padding: 2px 6px; border: none; background: transparent; color: #0284c7;">🔍</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <select class="input-select" style="min-width: 80px; font-size: 12px;" id="copq-status-filter-select" onchange="renderCoPQElementsTable()">
+              <option value="ALL">All ✕</option>
+              <option value="CoPQ Created">CoPQ Created</option>
+            </select>
+          </div>
+
+          <button class="btn-icon" style="padding: 6px 12px; border-color: #0284c7; color: #0284c7; font-weight: 600;" onclick="clearCopqElementFilters()">
+            🔻 Clear Filter
+          </button>
+
+          <select class="input-select" style="min-width: 110px; font-size: 12px;">
+            <option>Open CoPQs ✕</option>
+            <option>Closed CoPQs</option>
+          </select>
+
+          <button class="btn-icon" style="padding: 6px 10px;" title="Export" onclick="showToast('Exporting CoPQ Elements', 'info')">📄</button>
+          <button class="btn-icon" style="padding: 6px 10px;" title="Grid Settings">⚙️</button>
+        </div>
+
+        <!-- COPQ ELEMENTS DATA TABLE (IMAGE 2 MATCH) -->
+        <div class="table-container">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 110px; text-align: center;">Actions</th>
+                  <th style="text-align: center;">CoPQ Status 🔻</th>
+                  <th>CoPQ Number 🔻</th>
+                  <th>Name 🔻</th>
+                  <th>Initiation Date 🔻</th>
+                  <th>Initiator 🔻</th>
+                  <th>Plant 🔻</th>
+                  <th>Part Number 🔻</th>
+                  <th>Linked Module | Number 🔻</th>
+                  <th>Supplier 🔻</th>
+                  <th>Supplier Code 🔻</th>
+                  <th>Currency 🔻</th>
+                  <th style="text-align: right;">Total Cost 🔻</th>
+                  <th style="text-align: right;">Chargeback Amount 🔻</th>
+                  <th style="text-align: center;">Chargeback Status 🔻</th>
+                </tr>
+              </thead>
+              <tbody id="copq-elements-table-body">
+                <!-- JS Population -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== VIEW 3: INITIATE CHARGEBACK MODULE ==================== -->
+      <div id="view-chargeback" class="module-view" style="display: none;">
+
+        <!-- SUPPLIER & COMPONENT FILTER PANEL & TOP ACTION BAR -->
+        <div class="action-header">
+          <div class="action-left" style="gap:20px; align-items:center; flex-wrap:wrap;">
+            <div>
+              <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Choose Supplier:</label>
+              <select class="input-select" id="supplier-filter-select" style="min-width: 280px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onSupplierFilterChange()">
+                <option value="JIN HENG INTERNATIONAL CO LTD">JIN HENG INTERNATIONAL CO LTD</option>
+                <option value="WON SINH TECHNOLOGY (THAILAND)">WON SINH TECHNOLOGY (THAILAND)</option>
+                <option value="VIETNAM ZHISHANG NEW MATERIALS">VIETNAM ZHISHANG NEW MATERIALS</option>
+                <option value="SS FLOOR COMPANY *WT*USD* CHI">SS FLOOR COMPANY *WT*USD* CHI</option>
+                <option value="ALL">-- Show All Suppliers --</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Component (Multi-Select):</label>
+              <div class="multiselect-wrapper" id="component-multiselect-wrapper">
+                <div class="multiselect-trigger" id="component-multiselect-trigger" onclick="toggleComponentDropdown(event)">
+                  <span id="component-multiselect-label">-- All Components --</span>
+                </div>
+                <div class="multiselect-menu" id="component-multiselect-menu">
+                  <div class="multiselect-header">
+                    <span>Component Options</span>
+                    <div>
+                      <button type="button" class="multiselect-header-btn" onclick="selectAllComponents(true)">Select All</button>
+                      <span style="margin: 0 4px; color: #cbd5e1;">|</span>
+                      <button type="button" class="multiselect-header-btn" onclick="selectAllComponents(false)">Clear</button>
+                    </div>
+                  </div>
+                  <div id="component-options-container">
+                    <!-- Populated dynamically with unique Component values from table -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-right" style="gap:12px; align-items:center;">
+            <button class="btn-primary" style="padding:9px 18px; font-size:13px; font-weight:600;" onclick="executeChargeback()">
+              ⚡ Submit Chargeback Request
+            </button>
+            <button class="btn-icon" onclick="switchModule('warranty')">← Back to Warranty Claims</button>
+          </div>
+        </div>
+
+        <!-- INITIATE CHARGEBACK CLAIMS TABLE (REFERENCING IMAGE 2 EXCEL) -->
+        <div class="table-container">
+          <div class="table-scroll">
+            <table class="data-table" id="chargeback-table">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">
+                    <input type="checkbox" id="cb-select-all" onchange="toggleSelectAllChargebacks(this)">
+                  </th>
+                  <th>Calendar Date</th>
+                  <th>Claim Num</th>
+                  <th>Claim Seq Num</th>
+                  <th>Claim Reason</th>
+                  <th>Component</th>
+                  <th>Mfg Style</th>
+                  <th>Mfg Color Cd</th>
+                  <th>Mfg Size Cd</th>
+                  <th style="text-align:right;">Total Claim Amount</th>
+                </tr>
+              </thead>
+              <tbody id="chargeback-table-body">
+                <!-- JS populated rows matching Image 2 excel -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div id="cb-records-count">Showing 0 of 0 records</div>
+            <div style="font-weight:600; color:#0284c7;" id="cb-table-sum">Supplier Total: $0.00</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== VIEW 5: COPQ CHARGEBACK REQUESTS LIST (IMAGE 4 MATCH) ==================== -->
+      <div id="view-copq-chargebacks" class="module-view" style="display: none;">
+        
+        <!-- TOP TOOLBAR -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <button class="btn-primary" style="padding: 8px 16px; font-weight: 600; font-size: 13px;" onclick="switchModule('chargeback')">
+            + Add New Chargeback
+          </button>
+        </div>
+
+        <!-- SEARCH & FILTER TOOLBAR (MATCHING IMAGE 4) -->
+        <div class="search-row" style="margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 250px; display: flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; background: white;">
+            <input type="text" id="cbr-search-input" class="input-text" style="border: none; outline: none; box-shadow: none; width: 100%;" placeholder="Select Column to Search..." oninput="renderCoPQChargebackRequestsTable()">
+            <button class="btn-icon" style="padding: 2px 6px; border: none; background: transparent; color: #0284c7;">🔍</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; font-weight: 600; color: #475569;">Chargeback Status</span>
+            <select class="input-select" id="cbr-status-filter" style="min-width: 110px; font-size: 12px;" onchange="renderCoPQChargebackRequestsTable()">
+              <option value="All">All</option>
+              <option value="New">New</option>
+              <option value="Chargeback Accepted">Chargeback Accepted</option>
+              <option value="Closed">Closed</option>
+              <option value="Chargeback Initiated">Chargeback Initiated</option>
+              <option value="Force Chargeback Initiated">Force Chargeback Initiated</option>
+              <option value="Partially Paid">Partially Paid</option>
+              <option value="Authorised">Authorised</option>
+              <option value="Authorization Initiated">Authorization Initiated</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="Fully Paid">Fully Paid</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 11px; font-weight: 600; color: #475569;">Time Range</span>
+            <select class="input-select" style="min-width: 80px; font-size: 12px;">
+              <option>All</option>
+            </select>
+          </div>
+
+          <button class="btn-icon" style="padding: 6px 12px; border-color: #0284c7; color: #0284c7; font-weight: 600;" onclick="clearCbrFilters()">
+            🔻 Clear Filter
+          </button>
+          <button class="btn-icon" style="padding: 6px 10px;" title="Export" onclick="showToast('Exporting Chargeback Requests', 'info')">📄</button>
+          <button class="btn-icon" style="padding: 6px 10px;" title="Grid Settings">⚙️</button>
+        </div>
+
+        <!-- CHARGEBACK REQUESTS DATA TABLE (IMAGE 4 MATCH) -->
+        <div class="table-container">
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 70px; text-align: center;">Actions</th>
+                  <th>Chargeback Number 🔻</th>
+                  <th>Name 🔻</th>
+                  <th>Initiation Date 🔻</th>
+                  <th>Initiator 🔻</th>
+                  <th>Coordinator 🔻</th>
+                  <th>Supplier Name 🔻</th>
+                  <th>Supplier Coordinator 🔻</th>
+                  <th>Currency 🔻</th>
+                  <th style="text-align: right;">Chargeback Cost to Supplier</th>
+                  <th style="text-align: center;">Status 🔻</th>
+                </tr>
+              </thead>
+              <tbody id="copq-chargebacks-table-body">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== VIEW 4: CHARGEBACK DETAILS VIEW (IMAGE 3 MATCH) ==================== -->
+      <div id="view-chargeback-detail" class="module-view" style="display: none;">
+        
+        <!-- TOP HEADER BAR -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <button class="btn-icon" style="color: #2563eb; font-weight: 600; font-size: 13px;" onclick="switchModule('chargeback')">
+            ← View Supplier Chargeback
+          </button>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 12px; font-weight: 600; color: #475569;">Status:</span>
+            <span class="badge badge-solid-blue" style="padding: 4px 10px; font-size: 11px;">New</span>
+            <button class="btn-icon" onclick="showToast('Status history opened', 'info')">
+              <span>🕒</span> Status History
+            </button>
+            <button class="btn-icon" onclick="showToast('Chargeback export initiated', 'success')">
+              <span>📄</span> Export
+            </button>
+          </div>
+        </div>
+
+        <!-- SECTION 1: CHARGEBACK REQUEST DETAILS -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+          <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 13px; font-weight: 700; color: #0284c7;">Chargeback Request Details</h3>
+            <span style="cursor: pointer; font-weight: bold; color: #64748b;">—</span>
+          </div>
+          <div style="padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 24px; font-size: 12px;">
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Number:</span> <strong id="cbd-number" style="color: #1e293b;">Chargeback-26-0550</strong></div>
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Name:</span> <span id="cbd-name">Supplier CB</span></div>
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Status:</span> <span class="badge badge-solid-blue" id="cbd-status">New</span></div>
+            
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Initiator:</span> <span id="cbd-initiator">Norman Hemmings</span></div>
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Initiation Date:</span> <span id="cbd-date">30 Jul 2026</span></div>
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Supplier Coordinator:</span> <span id="cbd-supplier-coordinator">Jason Taylor</span></div>
+
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Coordinator:</span> <span id="cbd-coordinator">Norman Hemmings</span></div>
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Supplier:</span> <strong id="cbd-supplier">JIN HENG INTERNATIONAL CO LTD</strong></div>
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">End Date:</span> <span id="cbd-end-date">30 Jul 2026</span></div>
+
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Currency:</span> <span id="cbd-currency">USD</span></div>
+            <div><span style="color: #64748b; font-weight: 600; display: inline-block; width: 110px;">Start Date:</span> <span id="cbd-start-date">31 Dec 2019</span></div>
+            <div></div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: COPQ ELEMENTS DETAILS -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+          <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+            <h3 style="font-size: 13px; font-weight: 700; color: #0284c7;">CoPQ Elements Details</h3>
+          </div>
+          <div>
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Calendar Date</th>
+                    <th>Claim Num</th>
+                    <th>Claim Seq Num</th>
+                    <th>Claim Reason</th>
+                    <th>Mfg Style</th>
+                    <th>Mfg Color Cd</th>
+                    <th style="text-align: right;">Chargeback Cost to Supplier</th>
+                  </tr>
+                </thead>
+                <tbody id="cbd-copq-table-body">
+                  <!-- Confirmed items -->
+                </tbody>
+              </table>
+            </div>
+            <div style="padding: 12px 16px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #0f172a; font-size: 13px;">
+              Total Cost of Poor Quality: <span id="cbd-total-copq" style="color:#0284c7;">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: AMOUNT RECEIVED -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+          <div style="padding: 12px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+            <h3 style="font-size: 13px; font-weight: 700; color: #0284c7;">Amount Received</h3>
+          </div>
+          <div style="padding: 32px 16px; text-align: center; color: #64748b; font-size: 13px;">
+            No Amount Received records found.
+          </div>
+        </div>
+
+        <!-- SECTION 4: AUTHORIZATION DETAILS & BOTTOM ACTIONS -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong style="color: #0284c7; font-size: 13px;">Authorization Details</strong>
+            <span style="color: #64748b; margin-left: 12px;">Status:</span>
+            <span class="badge badge-solid-blue">New</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn-icon" style="border-color: #f97316; color: #ea580c; font-weight: 600;" onclick="showToast('Edit mode enabled', 'info')">✏️ Edit</button>
+            <button class="btn-primary" onclick="finalizeInitiatedChargeback()">✓ Initiate Chargeback</button>
+            <button class="btn-icon" style="border-color: #ef4444; color: #dc2626; font-weight: 600;" onclick="switchModule('chargeback')">✕ Cancel</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+  </main>
+
+  <!-- MODAL 1: CREATE NEW CLAIM -->
+  <div class="modal-overlay" id="modal-new-claim">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🛡️ Create New Warranty Claim</div>
+        <button class="modal-close" onclick="closeModal('modal-new-claim')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-create-claim">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Claim/Issue Number *</label>
+              <input type="text" class="input-text" id="nc-claim-number" required placeholder="e.g. WR-CLM-2026-99001">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Customer Name *</label>
+              <input type="text" class="input-text" id="nc-customer" required placeholder="e.g. Karthik Engineering">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Complaint Reported Date</label>
+              <input type="date" class="input-text" id="nc-date" value="2026-07-30">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Customer Part Number</label>
+              <input type="text" class="input-text" id="nc-part-num" placeholder="e.g. CUS-HCY-1036">
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Part Detail & Description</label>
+              <input type="text" class="input-text" id="nc-part-detail" placeholder="e.g. Hydraulic Cylinder / HCY-320-10C">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Defect Quantity</label>
+              <input type="number" class="input-text" id="nc-qty" value="1" min="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Debit Amount ($)</label>
+              <input type="number" class="input-text" id="nc-debit" value="1250" step="0.01">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dealer Name</label>
+              <input type="text" class="input-text" id="nc-dealer" placeholder="e.g. Karthik Service Center">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Supply Plant</label>
+              <input type="text" class="input-text" id="nc-plant" placeholder="e.g. Hydraulic Systems Plant">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Supplier *</label>
+              <select class="input-select" id="nc-supplier">
+                <option value="JIN HENG INTERNATIONAL CO LTD">JIN HENG INTERNATIONAL CO LTD</option>
+                <option value="WON SINH TECHNOLOGY (THAILAND)">WON SINH TECHNOLOGY (THAILAND)</option>
+                <option value="VIETNAM ZHISHANG NEW MATERIALS">VIETNAM ZHISHANG NEW MATERIALS</option>
+                <option value="SS FLOOR COMPANY *WT*USD* CHI">SS FLOOR COMPANY *WT*USD* CHI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">VIN Information</label>
+              <input type="text" class="input-text" id="nc-vin" placeholder="1FA6P8CF0H5123456">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vehicle Model</label>
+              <input type="text" class="input-text" id="nc-model" placeholder="X-Line SUV">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Supplier Coordinator</label>
+              <input type="text" class="input-text" id="nc-coordinator" value="John Chen">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-icon" onclick="closeModal('modal-new-claim')">Cancel</button>
+        <button class="btn-primary" onclick="saveNewClaim()">Save & Submit Claim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CLAIM DETAILS DRAWER -->
+  <div class="modal-overlay" id="modal-view-claim">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="view-claim-title">Warranty Claim Details</div>
+        <button class="modal-close" onclick="closeModal('modal-view-claim')">✕</button>
+      </div>
+      <div class="modal-body" id="view-claim-body">
+        <!-- JS filled details -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-icon" onclick="closeModal('modal-view-claim')">Close</button>
+        <button class="btn-primary" id="btn-modal-initiate-cb" onclick="modalInitiateCb()">Initiate Chargeback for Claim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CHARGEBACK OVERVIEW (70% POPUP) -->
+  <div class="modal-overlay" id="modal-chargeback-overview">
+    <div class="modal-card" style="width: 70vw; max-width: 1200px; min-width: 750px; height: 85vh; max-height: 90vh;">
+      <div class="modal-header">
+        <div class="modal-title">Overview</div>
+        <button class="modal-close" onclick="closeModal('modal-chargeback-overview')">✕</button>
+      </div>
+      <div class="modal-body" style="padding:16px; gap:16px;">
+        
+        <!-- BANNERS AT TOP OF TABLE -->
+        <div style="display: flex; gap: 16px;">
+          <div style="flex: 1; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; display: flex; flex-direction: column;">
+            <span style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Total Cost</span>
+            <span id="overview-banner-total-cost" style="font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 4px;">$0.00</span>
+          </div>
+          <div style="flex: 1; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; display: flex; flex-direction: column;">
+            <span style="font-size: 11px; font-weight: 600; color: #166534; text-transform: uppercase; letter-spacing: 0.5px;">Total Chargeback</span>
+            <span id="overview-banner-total-chargeback" style="font-size: 20px; font-weight: 800; color: #15803d; margin-top: 4px;">$0.00</span>
+          </div>
+        </div>
+
+        <!-- OVERVIEW TABLE CONTAINER -->
+        <div class="table-container" style="flex: 1; overflow: hidden; display: flex; flex-direction: column;">
+          <div class="table-scroll" style="flex: 1; overflow-y: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Calendar Date</th>
+                  <th>Claim Num</th>
+                  <th>Claim Seq Num</th>
+                  <th>Claim Reason</th>
+                  <th>Mfg Style</th>
+                  <th>Mfg Color Cd</th>
+                  <th>Supplier</th>
+                  <th style="text-align: right;">Total Claim Amount</th>
+                  <th style="text-align: center; width: 130px;">% Charge back</th>
+                  <th style="text-align: right;">Chargeback Cost to Supplier</th>
+                </tr>
+              </thead>
+              <tbody id="overview-table-body">
+                <!-- Dynamically populated selected chargeback claims -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-icon" onclick="closeModal('modal-chargeback-overview')">Cancel</button>
+        <button class="btn-primary" onclick="confirmOverviewChargeback()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- MAIN JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    /* ==================== STATE MANAGEMENT ==================== */
+    const STORAGE_KEY_CLAIMS = "empower_qlm_warranty_claims";
+    const STORAGE_KEY_CHARGEBACKS = "empower_qlm_chargeback_items";
+
+    // Dataset from Image 1
+    const INITIAL_WARRANTY_CLAIMS = [
+      {
+        id: "WR-CLM-2026-33107",
+        claimStatus: "Workflow Completed",
+        customer: "Karthik Engineering",
+        reportDate: "19 Jul 2026",
+        customerPartNumber: "CUS-HCY-1036",
+        partDetail: "Hydraulic Cylinder / HCY-320-10C",
+        defectQty: 1,
+        dealerName: "Karthik Engineering Center",
+        supplyPlant: "Hydraulic Systems Plant",
+        supplier: "JIN HENG INTERNATIONAL CO LTD",
+        supplierCode: "SUP-JH-8801",
+        actionStatus: "In Review",
+        debitAmount: 2652.00,
+        vin: "1FA6P8CF0H5123456",
+        model: "X-Line SUV",
+        meetingDate: "22 Jul 2026",
+        coordinator: "John Chen",
+        copqStatus: "CoPQ Assessed",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      },
+      {
+        id: "WR-CLM-2026-33121",
+        claimStatus: "Reviewed",
+        customer: "Nova Industrial Solutions",
+        reportDate: "13 Jul 2026",
+        customerPartNumber: "CUS-ECU-4128",
+        partDetail: "Control Unit / ECU-150-4128-A",
+        defectQty: 1,
+        dealerName: "Nova Service Center",
+        supplyPlant: "Electronics Mfg Plant 1",
+        supplier: "JIN HENG INTERNATIONAL CO LTD",
+        supplierCode: "SUP-JH-8801",
+        actionStatus: "Pending Action",
+        debitAmount: 1387.00,
+        vin: "1G1YC2D70H5654321",
+        model: "Pro-Truck 500",
+        meetingDate: "18 Jul 2026",
+        coordinator: "Michael Wong",
+        copqStatus: "Pending CoPQ",
+        ncStatus: "Under Investigation",
+        ncRequired: "Yes",
+        segment: "Internal"
+      },
+      {
+        id: "WR-CLM-2026-33129",
+        claimStatus: "Reviewed",
+        customer: "Vertex Engineering",
+        reportDate: "12 Jul 2026",
+        customerPartNumber: "CUS-HSG-3315",
+        partDetail: "Housing / HSG-420-3315-A",
+        defectQty: 3,
+        dealerName: "Vertex Service Center",
+        supplyPlant: "Structural Components Plant",
+        supplier: "WON SINH TECHNOLOGY (THAILAND)",
+        supplierCode: "SUP-WS-3042",
+        actionStatus: "Action Required",
+        debitAmount: 3549.00,
+        vin: "5YJSA1E28HF123890",
+        model: "E-Sedan GT",
+        meetingDate: "16 Jul 2026",
+        coordinator: "Sarah Jenkins",
+        copqStatus: "CoPQ Approved",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      },
+      {
+        id: "WR-CLM-2025-10051",
+        claimStatus: "Reviewed",
+        customer: "Customer C",
+        reportDate: "21 Mar 2025",
+        customerPartNumber: "CUS-APX-9901",
+        partDetail: "x123 Structural Sub-assembly",
+        defectQty: 1,
+        dealerName: "Apex Service Center",
+        supplyPlant: "Powertrain Assembly Plant",
+        supplier: "SS FLOOR COMPANY *WT*USD* CHI",
+        supplierCode: "SUP-SS-1102",
+        actionStatus: "In Progress",
+        debitAmount: 1150.00,
+        vin: "2C3CDFGH9KH987123",
+        model: "Heavy Duty Hauler",
+        meetingDate: "25 Mar 2025",
+        coordinator: "David Miller",
+        copqStatus: "CoPQ Assessed",
+        ncStatus: "NC Closed",
+        ncRequired: "No",
+        segment: "Internal"
+      },
+      {
+        id: "WR-CLM-2026-33143",
+        claimStatus: "Reviewed",
+        customer: "Apex Manufacturing",
+        reportDate: "10 Jul 2026",
+        customerPartNumber: "CUS-HPU-1045",
+        partDetail: "Hydraulic Pump / HPU-250-1045",
+        defectQty: 1,
+        dealerName: "Apex Service Center",
+        supplyPlant: "Powertrain Assembly Plant",
+        supplier: "VIETNAM ZHISHANG NEW MATERIALS",
+        supplierCode: "SUP-VZ-9910",
+        actionStatus: "Action Required",
+        debitAmount: 2218.00,
+        vin: "3FA6P08U7HR445120",
+        model: "X-Line SUV",
+        meetingDate: "15 Jul 2026",
+        coordinator: "Alex Turner",
+        copqStatus: "CoPQ Assessed",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      },
+      {
+        id: "WR-CLM-2026-33145",
+        claimStatus: "Reviewed",
+        customer: "Karthik Engineering",
+        reportDate: "19 Jul 2026",
+        customerPartNumber: "CUS-HCY-1036",
+        partDetail: "Hydraulic Cylinder / HCY-320-10C",
+        defectQty: 1,
+        dealerName: "Karthik Engineering Center",
+        supplyPlant: "Hydraulic Systems Plant",
+        supplier: "JIN HENG INTERNATIONAL CO LTD",
+        supplierCode: "SUP-JH-8801",
+        actionStatus: "In Review",
+        debitAmount: 1434.00,
+        vin: "1FA6P8CF0H5123457",
+        model: "X-Line SUV",
+        meetingDate: "22 Jul 2026",
+        coordinator: "John Chen",
+        copqStatus: "CoPQ Assessed",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      },
+      {
+        id: "WR-CLM-2026-33147",
+        claimStatus: "Reviewed",
+        customer: "Swasthik Industries",
+        reportDate: "11 Jul 2026",
+        customerPartNumber: "CUS-GBX-2180",
+        partDetail: "Gearbox / GBX-310-2180-A",
+        defectQty: 2,
+        dealerName: "Swasthik Service Center",
+        supplyPlant: "Driveline Manufacturing",
+        supplier: "JIN HENG INTERNATIONAL CO LTD",
+        supplierCode: "SUP-JH-8801",
+        actionStatus: "Resolved",
+        debitAmount: 1760.00,
+        vin: "4T1B11HK5JU339102",
+        model: "City Cruiser",
+        meetingDate: "14 Jul 2026",
+        coordinator: "Michael Wong",
+        copqStatus: "CoPQ Approved",
+        ncStatus: "NC Closed",
+        ncRequired: "No",
+        segment: "Internal"
+      },
+      {
+        id: "WR-CLM-2026-33127",
+        claimStatus: "Reviewed",
+        customer: "Orion Systems",
+        reportDate: "18 Jul 2026",
+        customerPartNumber: "CUS-PWM-9271",
+        partDetail: "Power Module / PWM-600-9271",
+        defectQty: 3,
+        dealerName: "Orion Service Center",
+        supplyPlant: "Electronics Mfg Plant 1",
+        supplier: "JIN HENG INTERNATIONAL CO LTD",
+        supplierCode: "SUP-JH-8801",
+        actionStatus: "Pending Response",
+        debitAmount: 9610.00,
+        vin: "1G1YC2D70H5659999",
+        model: "Pro-Truck 500",
+        meetingDate: "20 Jul 2026",
+        coordinator: "Sarah Jenkins",
+        copqStatus: "Pending CoPQ",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      },
+      {
+        id: "WR-CLM-2026-33149",
+        claimStatus: "Claim Acknowledged",
+        customer: "Pioneer Components",
+        reportDate: "14 Jul 2026",
+        customerPartNumber: "CUS-MTR-5234",
+        partDetail: "Motor Assembly / MTR-220-5234",
+        defectQty: 2,
+        dealerName: "Pioneer Service Center",
+        supplyPlant: "Powertrain Assembly Plant",
+        supplier: "JIN HENG INTERNATIONAL CO LTD",
+        supplierCode: "SUP-JH-8801",
+        actionStatus: "Acknowledged",
+        debitAmount: 1179.00,
+        vin: "1FA6P8CF0H5123999",
+        model: "E-Sedan GT",
+        meetingDate: "17 Jul 2026",
+        coordinator: "Alex Turner",
+        copqStatus: "CoPQ Assessed",
+        ncStatus: "Under Investigation",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      },
+      {
+        id: "WR-CLM-2026-33150",
+        claimStatus: "Claim Acknowledged",
+        customer: "Titan Manufacturing",
+        reportDate: "15 Jul 2026",
+        customerPartNumber: "CUS-PMP-6142",
+        partDetail: "Pump Assembly / PMP-180-6142",
+        defectQty: 3,
+        dealerName: "Titan Service Center",
+        supplyPlant: "Fluid Systems Plant",
+        supplier: "WON SINH TECHNOLOGY (THAILAND)",
+        supplierCode: "SUP-WS-3042",
+        actionStatus: "Acknowledged",
+        debitAmount: 495.00,
+        vin: "5YJSA1E28HF123777",
+        model: "Heavy Duty Hauler",
+        meetingDate: "19 Jul 2026",
+        coordinator: "David Miller",
+        copqStatus: "CoPQ Assessed",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      },
+      {
+        id: "WR-CLM-2026-33142",
+        claimStatus: "Open",
+        customer: "Fusion Dynamics",
+        reportDate: "17 Jul 2026",
+        customerPartNumber: "CUS-DSA-8163",
+        partDetail: "Drive Shaft / DSA-410-8163-A",
+        defectQty: 2,
+        dealerName: "Fusion Service Center",
+        supplyPlant: "Driveline Manufacturing",
+        supplier: "JIN HENG INTERNATIONAL CO LTD",
+        supplierCode: "SUP-JH-8801",
+        actionStatus: "Open",
+        debitAmount: 3881.00,
+        vin: "3FA6P08U7HR445999",
+        model: "Pro-Truck 500",
+        meetingDate: "21 Jul 2026",
+        coordinator: "John Chen",
+        copqStatus: "Pending CoPQ",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      }
+    ];
+
+    // Dataset from Image 2 (Excel Image) - Chargeback Claims
+    const INITIAL_CHARGEBACK_DATA = [
+      { date: "09-06-2026", claimNum: "600064226", seqNum: "010000551013", reason: "2153 - Shrinkage", component: "Labour", style: "67837-BALLARD 2.0", colorCd: "190", sizeCd: "0648", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2652 },
+      { date: "09-06-2026", claimNum: "600079684", seqNum: "010000477223", reason: "2170 - Other Physical Defects", component: "Labour", style: "67916-PRO SOLUTION 23", colorCd: "232", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1387 },
+      { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462589", reason: "2169 - Milling / Locking System", component: "Product Line", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 97 },
+      { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462596", reason: "2169 - Milling / Locking System", component: "Product Line", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1434 },
+      { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462615", reason: "2169 - Milling / Locking System", component: "Product Line", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 14 },
+      { date: "09-06-2026", claimNum: "600082369", seqNum: "010000466026", reason: "2164 - Cupping", component: "Product Line", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2237 },
+      { date: "09-06-2026", claimNum: "600082369", seqNum: "010000480861", reason: "2164 - Cupping", component: "Labour", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1760 },
+      { date: "09-06-2026", claimNum: "600082369", seqNum: "010000557435", reason: "2164 - Cupping", component: "Product Line", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 150 },
+      { date: "09-06-2026", claimNum: "600084827", seqNum: "010000537649", reason: "2164 - Cupping", component: "Labour", style: "67755-TILE OPTIONS", colorCd: "976", sizeCd: "1836", supplier: "SS FLOOR COMPANY *WT*USD* CHI", amount: 1150 },
+      { date: "09-06-2026", claimNum: "600086483", seqNum: "010000488006", reason: "2155 - Wear Layer", component: "Product Line", style: "67938-EMERALD WATER IMPORT", colorCd: "822", sizeCd: "07B47", supplier: "WON SINH TECHNOLOGY (THAILAND)", amount: 3549 },
+      { date: "09-06-2026", claimNum: "600088747", seqNum: "010000500925", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "004", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 480 },
+      { date: "09-06-2026", claimNum: "600088751", seqNum: "010000500885", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "004", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 560 },
+      { date: "09-06-2026", claimNum: "600088752", seqNum: "010000500849", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "004", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 480 },
+      { date: "09-06-2026", claimNum: "600089982", seqNum: "010000509416", reason: "2164 - Cupping", component: "Product Line", style: "67935-BOXWOOD GABLES", colorCd: "838", sizeCd: "07A48E", supplier: "WON SINH TECHNOLOGY (THAILAND)", amount: 495 },
+      { date: "09-06-2026", claimNum: "600090194", seqNum: "010000510558", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67824-PRO SOL GD 2/6", colorCd: "983", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 9610 },
+      { date: "09-06-2026", claimNum: "600094066", seqNum: "010000541723", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1179 },
+      { date: "09-06-2026", claimNum: "600094097", seqNum: "010000541768", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1914 },
+      { date: "09-06-2026", claimNum: "600094105", seqNum: "010000541911", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2552 },
+      { date: "09-06-2026", claimNum: "600094127", seqNum: "010000541948", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1183 },
+      { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544736", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 600 },
+      { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544748", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1134 },
+      { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544810", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 139 },
+      { date: "09-06-2026", claimNum: "600094288", seqNum: "010000544867", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67837-BALLARD 2.0", colorCd: "330", sizeCd: "0648", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 3881 },
+      { date: "09-06-2026", claimNum: "600094293", seqNum: "010000544910", reason: "2130 - Performance Warranty", component: "Product Line", style: "67916-PRO SOLUTION 23", colorCd: "838", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2015 },
+      { date: "09-06-2026", claimNum: "600094301", seqNum: "010000544953", reason: "2130 - Performance Warranty", component: "Product Line", style: "67824-PRO SOL GD 2/6", colorCd: "124", sizeCd: "0648V", supplier: "VIETNAM ZHISHANG NEW MATERIALS", amount: 2218 },
+      { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544896", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1270 },
+      { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544906", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 640 },
+      { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544914", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 139 },
+      { date: "09-06-2026", claimNum: "600094325", seqNum: "010000544969", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 840 },
+      { date: "09-06-2026", claimNum: "600094325", seqNum: "010000544988", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 60 },
+      { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545018", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1212 },
+      { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545035", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 640 },
+      { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545045", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 46 }
+    ];
+
+    // Dataset from Image 2 - CoPQ Elements
+    const INITIAL_COPQ_ELEMENTS = [
+      { number: "CoPQ-2026-1469", name: "NC created via automation", date: "30 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4626", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 20000.00, cbAmount: 20000.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1468", name: "NC created via automation", date: "30 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4624", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1467", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4621", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1465", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "WR | WR-CLM-2026-33142", supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801", currency: "US Dollar", totalCost: 3881.00, cbAmount: 3881.00, cbStatus: "Chargeback Initiated", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1464", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4618", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1463", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4616", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1462", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4615", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1461", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4613", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1460", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4611", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1459", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4610", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1458", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4609", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" },
+      { number: "CoPQ-2026-1457", name: "NC created via automation", date: "29 Jul 2026", initiator: "Norman Hemmings", plant: "Test bangalore 1", partNum: "x123", linkedModule: "NC | NC-2026-4608", supplier: "Na Veen", supplierCode: "NaVeen", currency: "Indian Rupee", totalCost: 0.00, cbAmount: 0.00, cbStatus: "-", status: "CoPQ Created", category: "Supplier" }
+    ];
+
+    // Dataset from Image 4 - Chargeback Requests
+    const INITIAL_CHARGEBACK_REQUESTS = [
+      { number: "Chargeback-26-0549", name: "Supplier CB", date: "30 Jul 2026", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "auto products", currency: "Indian Rupee", cost: 250.00, status: "New" },
+      { number: "Chargeback-26-0547", name: "NC-2026-4212", date: "23 Feb 2026", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "Indian Rupee", cost: 0.00, status: "Chargeback Accepted" },
+      { number: "Chargeback-26-0545", name: "NC-2026-4180", date: "30 Jan 2026", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "Indian Rupee", cost: 298650.00, status: "Closed" },
+      { number: "Chargeback-26-0546", name: "Auto-CoPQ for Auto Products", date: "07 Feb 2026", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "Euro", cost: 1505.00, status: "New" },
+      { number: "Chargeback-26-0544", name: "New CB 01", date: "30 Jan 2026", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "Indian Rupee", cost: 0.00, status: "Chargeback Initiated" },
+      { number: "Chargeback-26-0543", name: "new cb 01", date: "29 Jan 2026", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "Indian Rupee", cost: 1450.00, status: "Force Chargeback Initiated" },
+      { number: "Chargeback-25-0525", name: "NC-2023-2265", date: "10 Apr 2025", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "US Dollar", cost: 1223.00, status: "Partially Paid" },
+      { number: "Chargeback-25-0535", name: "test", date: "04 Dec 2025", initiator: "Norman Hemmings", coordinator: "santhosh1 kumar", supplier: "Auto Products", supplierCoordinator: "auto products", currency: "Indian Rupee", cost: 0.00, status: "Chargeback Initiated" },
+      { number: "Chargeback-25-0539", name: "CB", date: "19 Dec 2025", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "US Dollar", cost: 0.00, status: "Authorised" },
+      { number: "Chargeback-25-0537", name: "rgrgrg", date: "05 Dec 2025", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "Indian Rupee", cost: 0.00, status: "Authorization Initiated" },
+      { number: "Chargeback-26-0540", name: "test CBO1", date: "16 Jan 2026", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "US Dollar", cost: 0.00, status: "Chargeback Initiated" },
+      { number: "Chargeback-25-0538", name: "ggggg", date: "10 Dec 2025", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "Jason Taylor", currency: "Indian Rupee", cost: 0.00, status: "Authorization Initiated" },
+      { number: "Chargeback-25-0536", name: "test", date: "04 Dec 2025", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "auto products", currency: "Indian Rupee", cost: 0.00, status: "Chargeback Initiated" },
+      { number: "Chargeback-25-0534", name: "test", date: "03 Dec 2025", initiator: "Norman Hemmings", coordinator: "Norman Hemmings", supplier: "Auto Products", supplierCoordinator: "auto products", currency: "US Dollar", cost: 5.00, status: "Cancelled" },
+      { number: "Chargeback-25-0533", name: "kjdn", date: "11 Aug 2025", initiator: "Norman Hemmings", coordinator: "santhosh1 kumar", supplier: "santhu - s6", supplierCoordinator: "santhosh Kumar S6 User1", currency: "US Dollar", cost: 1.00, status: "Fully Paid" },
+      { number: "Chargeback-25-0532", name: "NC-2025-3682", date: "11 Aug 2025", initiator: "Norman Hemmings", coordinator: "santhosh1 kumar", supplier: "Auto Products", supplierCoordinator: "auto products", currency: "Indian Rupee", cost: 7500.00, status: "Chargeback Initiated" }
+    ];
+
+    let warrantyClaims = [];
+    let chargebackItems = [];
+    let chargebackRequestsList = [];
+    let copqElementsList = [];
+    let selectedSegment = "All";
+    let selectedCopqSegment = "Supplier";
+    let selectedCopqTab = "my";
+    let activeClaimForModal = null;
+    let selectedChargebackIndexes = new Set();
+
+    // Init App
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      renderWarrantyTable();
+      renderCoPQElementsTable();
+      renderCoPQChargebackRequestsTable();
+      renderComponentOptions();
+      onSupplierFilterChange();
+    });
+
+    function loadState() {
+      const savedClaims = localStorage.getItem(STORAGE_KEY_CLAIMS);
+      if (savedClaims) {
+        try { warrantyClaims = JSON.parse(savedClaims); } catch(e) { warrantyClaims = [...INITIAL_WARRANTY_CLAIMS]; }
+      } else {
+        warrantyClaims = [...INITIAL_WARRANTY_CLAIMS];
+      }
+
+      const savedCb = localStorage.getItem(STORAGE_KEY_CHARGEBACKS);
+      if (savedCb) {
+        try { chargebackItems = JSON.parse(savedCb); } catch(e) { chargebackItems = [...INITIAL_CHARGEBACK_DATA]; }
+      } else {
+        chargebackItems = [...INITIAL_CHARGEBACK_DATA];
+      }
+
+      const savedCbr = localStorage.getItem("eq_chargeback_requests");
+      if (savedCbr) {
+        try { chargebackRequestsList = JSON.parse(savedCbr); } catch(e) { chargebackRequestsList = [...INITIAL_CHARGEBACK_REQUESTS]; }
+      } else {
+        chargebackRequestsList = [...INITIAL_CHARGEBACK_REQUESTS];
+      }
+
+      const savedCopqEl = localStorage.getItem("eq_copq_elements");
+      if (savedCopqEl) {
+        try { copqElementsList = JSON.parse(savedCopqEl); } catch(e) { copqElementsList = [...INITIAL_COPQ_ELEMENTS]; }
+      } else {
+        copqElementsList = [...INITIAL_COPQ_ELEMENTS];
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY_CLAIMS, JSON.stringify(warrantyClaims));
+      localStorage.setItem(STORAGE_KEY_CHARGEBACKS, JSON.stringify(chargebackItems));
+      localStorage.setItem("eq_chargeback_requests", JSON.stringify(chargebackRequestsList));
+      localStorage.setItem("eq_copq_elements", JSON.stringify(copqElementsList));
+    }
+
+    /* ==================== MODULE SWITCHING ==================== */
+    function switchModule(moduleName) {
+      document.getElementById("view-warranty").style.display = moduleName === 'warranty' ? 'block' : 'none';
+      
+      const vCopqEl = document.getElementById("view-copq-elements");
+      if (vCopqEl) vCopqEl.style.display = (moduleName === 'copq-elements' || moduleName === 'copq') ? 'block' : 'none';
+      
+      const vCbr = document.getElementById("view-copq-chargebacks");
+      if (vCbr) vCbr.style.display = moduleName === 'copq-chargebacks' ? 'block' : 'none';
+      
+      document.getElementById("view-chargeback").style.display = moduleName === 'chargeback' ? 'block' : 'none';
+      const viewDetail = document.getElementById("view-chargeback-detail");
+      if (viewDetail) viewDetail.style.display = moduleName === 'chargeback-detail' ? 'block' : 'none';
+
+      // Sidebar links
+      const linkHome = document.getElementById("nav-link-home");
+      const linkWarranty = document.getElementById("nav-link-warranty");
+      const linkCopq = document.getElementById("nav-link-copq");
+      const sublinkCopqEl = document.getElementById("sublink-copq-elements");
+      const sublinkCopqCb = document.getElementById("sublink-copq-chargebacks");
+
+      if (linkHome) linkHome.classList.toggle("active", moduleName === 'home');
+      if (linkWarranty) linkWarranty.classList.toggle("active", moduleName === 'warranty');
+      if (linkCopq) linkCopq.classList.toggle("active", moduleName === 'copq-elements' || moduleName === 'copq' || moduleName === 'copq-chargebacks');
+      if (sublinkCopqEl) sublinkCopqEl.classList.toggle("active", moduleName === 'copq-elements' || moduleName === 'copq');
+      if (sublinkCopqCb) sublinkCopqCb.classList.toggle("active", moduleName === 'copq-chargebacks');
+
+      // Breadcrumb
+      const titles = {
+        warranty: 'Warranty Claims',
+        'copq-elements': 'CoPQ Elements',
+        copq: 'CoPQ Elements',
+        'copq-chargebacks': 'Chargeback Requests',
+        chargeback: 'Initiate Chargeback',
+        'chargeback-detail': 'View Supplier Chargeback'
+      };
+      document.getElementById("breadcrumb-current").innerText = titles[moduleName] || 'Claims';
+
+      if (moduleName === 'chargeback') {
+        renderComponentOptions();
+        onSupplierFilterChange();
+      } else if (moduleName === 'copq-chargebacks') {
+        renderCoPQChargebackRequestsTable();
+      } else if (moduleName === 'copq-elements' || moduleName === 'copq') {
+        renderCoPQElementsTable();
+      }
+    }
+
+    function toggleSubmenu(id) {
+      const el = document.getElementById(id);
+      const ch = document.getElementById("warranty-chevron");
+      if (el.style.display === "block" || el.classList.contains("open")) {
+        el.style.display = "none";
+        el.classList.remove("open");
+        ch.classList.remove("open");
+      } else {
+        el.style.display = "block";
+        el.classList.add("open");
+        ch.classList.add("open");
+      }
+    }
+
+    function toggleSidebarMenu() {
+      const sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("collapsed");
+    }
+
+    /* ==================== UI RENDERING: WARRANTY ==================== */
+    function renderWarrantyTable() {
+      const tbody = document.getElementById("warranty-table-body");
+      const searchCol = document.getElementById("search-column-select") ? document.getElementById("search-column-select").value : "all";
+      const searchVal = document.getElementById("warranty-search-input") ? document.getElementById("warranty-search-input").value.toLowerCase().trim() : "";
+
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      let filtered = warrantyClaims.filter(item => {
+        if (selectedSegment !== "All" && item.segment !== selectedSegment) return false;
+        if (!searchVal) return true;
+        if (searchCol !== "all" && item[searchCol]) {
+          return String(item[searchCol]).toLowerCase().includes(searchVal);
+        }
+        return Object.values(item).some(val => String(val).toLowerCase().includes(searchVal));
+      });
+
+      // Update Header Stats
+      const statClaimsEl = document.getElementById("stat-total-claims");
+      if (statClaimsEl) statClaimsEl.innerText = (24580 + filtered.length - 11).toLocaleString();
+      let totalAmount = filtered.reduce((acc, curr) => acc + (curr.debitAmount || 0), 0);
+      const statValEl = document.getElementById("stat-total-value");
+      if (statValEl) statValEl.innerText = "$" + totalAmount.toLocaleString('en-US', {minimumFractionDigits:2});
+
+      filtered.forEach((claim, idx) => {
+        const tr = document.createElement("tr");
+
+        let statusBadgeClass = "badge-green";
+        if (claim.claimStatus === "Workflow Completed") statusBadgeClass = "badge-solid-green";
+        else if (claim.claimStatus === "Reviewed") statusBadgeClass = "badge-green";
+        else if (claim.claimStatus === "Claim Acknowledged") statusBadgeClass = "badge-blue";
+        else if (claim.claimStatus === "Open") statusBadgeClass = "badge-orange";
+
+        let copqStatusDisplay = "-";
+        if (claim.copqStatus && (claim.copqStatus.toLowerCase().includes("initiated") || claim.copqStatus.toLowerCase().includes("completed") || claim.copqStatus.toLowerCase().includes("assessed"))) {
+          copqStatusDisplay = `<span class="badge badge-blue">CoPQ initiated</span>`;
+        } else {
+          copqStatusDisplay = `<span style="color:#64748b;">-</span>`;
+        }
+
+        tr.innerHTML = `
+          <td style="white-space:nowrap; text-align:center;">
+            <div style="display:flex; gap:6px; align-items:center; justify-content:center;">
+              <button class="btn-tbl-orange" onclick="viewClaimDetails('${claim.id}')" title="Edit Claim">✏️</button>
+              <button class="btn-tbl-green" onclick="viewClaimDetails('${claim.id}')" title="View Details">👁️</button>
+            </div>
+          </td>
+          <td><span class="badge ${statusBadgeClass}">${claim.claimStatus}</span></td>
+          <td><strong style="color:#0284c7; cursor:pointer;" onclick="viewClaimDetails('${claim.id}')">${claim.id}</strong></td>
+          <td>${claim.reportDate}</td>
+          <td><code>${claim.customerPartNumber}</code></td>
+          <td>${claim.partDetail}</td>
+          <td style="text-align:center;">${claim.defectQty}</td>
+          <td>${claim.dealerName}</td>
+          <td><strong>${claim.supplier}</strong></td>
+          <td><code>${claim.supplierCode}</code></td>
+          <td><span class="badge badge-gray">${claim.actionStatus}</span></td>
+          <td style="font-weight:700; color:#0f172a; text-align:right;">$${Number(claim.debitAmount).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          <td>${claim.model}</td>
+          <td>${claim.coordinator}</td>
+          <td style="text-align:center;">${copqStatusDisplay}</td>
+          <td><span class="badge ${claim.ncStatus.includes('Closed') ? 'badge-gray' : 'badge-orange'}">${claim.ncStatus}</span></td>
+          <td style="text-align:center;">${claim.ncRequired === 'Yes' ? '✅ Yes' : '❌ No'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const pagInfo = document.getElementById("pagination-info");
+      if (pagInfo) pagInfo.innerText = `Showing 1 to ${filtered.length} of ${24580 + filtered.length - 11} records`;
+    }
+
+    function filterBySegment(segment, btn) {
+      selectedSegment = segment;
+      document.querySelectorAll(".segmented-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderWarrantyTable();
+    }
+
+    function clearWarrantyFilters() {
+      if (document.getElementById("warranty-search-input")) document.getElementById("warranty-search-input").value = "";
+      if (document.getElementById("search-column-select")) document.getElementById("search-column-select").value = "all";
+      selectedSegment = "All";
+      renderWarrantyTable();
+      showToast("Filters cleared", "info");
+    }
+
+    /* ==================== COPQ ELEMENTS MODULE RENDERING ==================== */
+    function renderCoPQElementsTable() {
+      const tbody = document.getElementById("copq-elements-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const searchVal = (document.getElementById("copq-elements-search")?.value || "").toLowerCase().trim();
+      const statusFilter = document.getElementById("copq-status-filter-select")?.value || "ALL";
+
+      let filtered = copqElementsList.filter(item => {
+        if (selectedCopqSegment !== "All" && item.category !== selectedCopqSegment) return false;
+        if (statusFilter !== "ALL" && item.status !== statusFilter) return false;
+        if (searchVal) {
+          return Object.values(item).some(val => String(val).toLowerCase().includes(searchVal));
+        }
+        return true;
+      });
+
+      filtered.forEach((item) => {
+        const tr = document.createElement("tr");
+
+        let cbStatusBadge = `<span style="color:#64748b;">-</span>`;
+        if (item.cbStatus === "Chargeback Initiated") {
+          cbStatusBadge = `<span class="badge badge-orange">Chargeback Initiated</span>`;
+        }
+
+        tr.innerHTML = `
+          <td style="white-space:nowrap; text-align:center;">
+            <div style="display:flex; gap:6px; align-items:center; justify-content:center;">
+              <button class="btn-tbl-orange" title="Edit CoPQ" onclick="showToast('Edit CoPQ ${item.number}', 'info')">✏️</button>
+              <button class="btn-tbl-green" title="View CoPQ" onclick="showToast('View CoPQ details for ${item.number}', 'info')">👁️</button>
+              <button class="btn-tbl-blue-badge" title="Linked Actions" onclick="showToast('2 Actions linked to ${item.number}', 'info')">
+                ⋮ <span class="badge-dot-num">2</span>
+              </button>
+            </div>
+          </td>
+          <td style="text-align:center;"><span class="badge badge-solid-blue">${item.status}</span></td>
+          <td><strong style="color:#0284c7;">${item.number}</strong></td>
+          <td>${item.name}</td>
+          <td>${item.date}</td>
+          <td>${item.initiator}</td>
+          <td>${item.plant}</td>
+          <td><code>${item.partNum}</code></td>
+          <td><span class="badge badge-gray">${item.linkedModule}</span></td>
+          <td><strong>${item.supplier}</strong></td>
+          <td><code>${item.supplierCode}</code></td>
+          <td><span class="badge badge-gray">${item.currency}</span></td>
+          <td style="text-align:right; font-weight:700; color:#0f172a;">${item.currency === 'Euro' ? '€' : item.currency === 'Indian Rupee' ? '₹' : '$'}${Number(item.totalCost).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          <td style="text-align:right; font-weight:700; color:#0284c7;">${item.currency === 'Euro' ? '€' : item.currency === 'Indian Rupee' ? '₹' : '$'}${Number(item.cbAmount).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          <td style="text-align:center;">${cbStatusBadge}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterCopqElementsSegment(seg, btn) {
+      selectedCopqSegment = seg;
+      document.getElementById("btn-segment-supplier").className = seg === 'Supplier' ? 'btn-primary' : 'btn-outline-primary';
+      document.getElementById("btn-segment-internal").className = seg === 'Internal' ? 'btn-primary' : 'btn-outline-primary';
+      renderCoPQElementsTable();
+    }
+
+    function switchCopqTab(tab, btn) {
+      selectedCopqTab = tab;
+      document.getElementById("tab-my-copq").className = tab === 'my' ? 'btn-primary' : 'btn-outline-primary';
+      document.getElementById("tab-all-copq").className = tab === 'all' ? 'btn-primary' : 'btn-outline-primary';
+      renderCoPQElementsTable();
+    }
+
+    function clearCopqElementFilters() {
+      if (document.getElementById("copq-elements-search")) document.getElementById("copq-elements-search").value = "";
+      if (document.getElementById("copq-status-filter-select")) document.getElementById("copq-status-filter-select").value = "ALL";
+      renderCoPQElementsTable();
+      showToast("CoPQ filters cleared", "info");
+    }
+
+    function openNewCopqModal() {
+      showToast("Create New CoPQ Form Opened", "info");
+    }
+
+    /* ==================== CHARGEBACK MODULE & COMPONENT MULTI-SELECT FILTER ==================== */
+    let selectedComponents = [];
+
+    function getUniqueComponents() {
+      const set = new Set();
+      chargebackItems.forEach(item => {
+        if (item.component) set.add(item.component);
+      });
+      return Array.from(set).sort();
+    }
+
+    function renderComponentOptions() {
+      const container = document.getElementById("component-options-container");
+      if (!container) return;
+
+      const uniqueComps = getUniqueComponents();
+      container.innerHTML = "";
+
+      uniqueComps.forEach(comp => {
+        const isChecked = selectedComponents.length === 0 || selectedComponents.includes(comp);
+        const label = document.createElement("label");
+        label.className = "multiselect-option";
+        label.innerHTML = `
+          <input type="checkbox" value="${comp}" ${isChecked ? 'checked' : ''} onchange="onComponentCheckboxChange()">
+          <span>${comp}</span>
+        `;
+        container.appendChild(label);
+      });
+
+      updateComponentTriggerLabel();
+    }
+
+    function toggleComponentDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("component-multiselect-menu");
+      if (menu) {
+        menu.classList.toggle("show");
+      }
+    }
+
+    function onComponentCheckboxChange() {
+      const checkboxes = document.querySelectorAll("#component-options-container input[type='checkbox']");
+      const checkedVals = [];
+      checkboxes.forEach(cb => {
+        if (cb.checked) checkedVals.push(cb.value);
+      });
+
+      const uniqueComps = getUniqueComponents();
+      if (checkedVals.length === uniqueComps.length || checkedVals.length === 0) {
+        selectedComponents = [];
+      } else {
+        selectedComponents = checkedVals;
+      }
+
+      updateComponentTriggerLabel();
+      onSupplierFilterChange();
+    }
+
+    function selectAllComponents(selectAll) {
+      const checkboxes = document.querySelectorAll("#component-options-container input[type='checkbox']");
+      checkboxes.forEach(cb => cb.checked = selectAll);
+      onComponentCheckboxChange();
+    }
+
+    function updateComponentTriggerLabel() {
+      const labelEl = document.getElementById("component-multiselect-label");
+      if (!labelEl) return;
+
+      const uniqueComps = getUniqueComponents();
+      if (selectedComponents.length === 0 || selectedComponents.length === uniqueComps.length) {
+        labelEl.innerText = "-- All Components --";
+      } else if (selectedComponents.length === 1) {
+        labelEl.innerText = selectedComponents[0];
+      } else if (selectedComponents.length === 2) {
+        labelEl.innerText = selectedComponents.join(", ");
+      } else {
+        labelEl.innerText = `${selectedComponents.length} Selected`;
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const wrapper = document.getElementById("component-multiselect-wrapper");
+      if (wrapper && !wrapper.contains(e.target)) {
+        const menu = document.getElementById("component-multiselect-menu");
+        if (menu) menu.classList.remove("show");
+      }
+    });
+
+    function onSupplierFilterChange() {
+      const supplierSelect = document.getElementById("supplier-filter-select") ? document.getElementById("supplier-filter-select").value : "ALL";
+      
+      const tbody = document.getElementById("chargeback-table-body");
+      if (!tbody) return;
+
+      selectedChargebackIndexes.clear();
+      const masterChk = document.getElementById("cb-select-all");
+      if (masterChk) masterChk.checked = false;
+
+      tbody.innerHTML = "";
+
+      const uniqueComps = getUniqueComponents();
+
+      let filteredItems = chargebackItems.filter(item => {
+        if (supplierSelect !== "ALL" && item.supplier !== supplierSelect) return false;
+        if (selectedComponents.length > 0 && selectedComponents.length < uniqueComps.length && !selectedComponents.includes(item.component)) return false;
+        return true;
+      });
+
+      let supplierSum = 0;
+
+      filteredItems.forEach((item, index) => {
+        supplierSum += item.amount;
+        const globalIdx = chargebackItems.indexOf(item);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="text-align:center;">
+            <input type="checkbox" class="cb-row-check" data-index="${globalIdx}" onchange="onChargebackRowCheckChange(this)">
+          </td>
+          <td>${item.date}</td>
+          <td><strong style="color:#0284c7;">${item.claimNum}</strong></td>
+          <td><code>${item.seqNum}</code></td>
+          <td>${item.reason}</td>
+          <td><span class="badge badge-gray">${item.component}</span></td>
+          <td>${item.style}</td>
+          <td>${item.colorCd}</td>
+          <td>${item.sizeCd}</td>
+          <td style="font-weight:bold; color:#0f172a; text-align:right;">$${item.amount.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const cntEl = document.getElementById("cb-records-count");
+      if (cntEl) cntEl.innerText = `Showing ${filteredItems.length} claim item records`;
+      
+      const sumEl = document.getElementById("cb-table-sum");
+      if (sumEl) sumEl.innerText = `Total: $${supplierSum.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+
+      updateChargebackSummaryBar();
+    }
+
+    function onChargebackRowCheckChange(chk) {
+      const idx = parseInt(chk.getAttribute("data-index"));
+      if (chk.checked) {
+        selectedChargebackIndexes.add(idx);
+      } else {
+        selectedChargebackIndexes.delete(idx);
+      }
+      updateChargebackSummaryBar();
+    }
+
+    function toggleSelectAllChargebacks(masterChk) {
+      const checkboxes = document.querySelectorAll(".cb-row-check");
+      checkboxes.forEach(chk => {
+        chk.checked = masterChk.checked;
+        const idx = parseInt(chk.getAttribute("data-index"));
+        if (masterChk.checked) {
+          selectedChargebackIndexes.add(idx);
+        } else {
+          selectedChargebackIndexes.delete(idx);
+        }
+      });
+      updateChargebackSummaryBar();
+    }
+
+    function updateChargebackSummaryBar() {
+      const selectedCountEl = document.getElementById("cb-selected-count");
+      if (selectedCountEl) selectedCountEl.innerText = selectedChargebackIndexes.size;
+      let sum = 0;
+      selectedChargebackIndexes.forEach(idx => {
+        if (chargebackItems[idx]) {
+          sum += chargebackItems[idx].amount;
+        }
+      });
+      const selectedAmtEl = document.getElementById("cb-selected-amount");
+      if (selectedAmtEl) selectedAmtEl.innerText = "$" + sum.toLocaleString('en-US', {minimumFractionDigits:2});
+    }
+
+    let selectedOverviewItems = [];
+
+    function executeChargeback() {
+      if (selectedChargebackIndexes.size === 0) {
+        showToast("Please select at least one claim using checkboxes to submit chargeback request", "info");
+        return;
+      }
+
+      selectedOverviewItems = [];
+      selectedChargebackIndexes.forEach(idx => {
+        if (chargebackItems[idx]) {
+          selectedOverviewItems.push({
+            item: chargebackItems[idx],
+            percent: 100,
+            costToSupplier: chargebackItems[idx].amount
+          });
+        }
+      });
+
+      renderOverviewModal();
+      document.getElementById("modal-chargeback-overview").classList.add("active");
+    }
+
+    function renderOverviewModal() {
+      const tbody = document.getElementById("overview-table-body");
+      tbody.innerHTML = "";
+
+      let totalCost = 0;
+      let totalChargeback = 0;
+
+      selectedOverviewItems.forEach((entry, idx) => {
+        totalCost += entry.item.amount;
+        totalChargeback += entry.costToSupplier;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${entry.item.date}</td>
+          <td><strong style="color:#0284c7;">${entry.item.claimNum}</strong></td>
+          <td><code>${entry.item.seqNum}</code></td>
+          <td>${entry.item.reason}</td>
+          <td>${entry.item.style}</td>
+          <td>${entry.item.colorCd}</td>
+          <td><strong>${entry.item.supplier}</strong></td>
+          <td style="text-align:right; font-weight:600;">$${entry.item.amount.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          <td style="text-align:center;">
+            <input type="text" class="pct-input-no-spin" value="${entry.percent}" oninput="onOverviewPercentChange(${idx}, this)" style="width:70px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; font-weight:bold; text-align:right;"> %
+          </td>
+          <td id="ov-cost-${idx}" style="text-align:right; font-weight:700; color:#15803d;">$${entry.costToSupplier.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("overview-banner-total-cost").innerText = "$" + totalCost.toLocaleString('en-US', {minimumFractionDigits:2});
+      document.getElementById("overview-banner-total-chargeback").innerText = "$" + totalChargeback.toLocaleString('en-US', {minimumFractionDigits:2});
+    }
+
+    function onOverviewPercentChange(index, inputEl) {
+      let val = inputEl.value;
+      val = val.replace(/[^0-9.]/g, '');
+      let pct = parseFloat(val);
+      if (isNaN(pct)) pct = 0;
+      if (pct > 100) { pct = 100; inputEl.value = '100'; }
+
+      selectedOverviewItems[index].percent = val;
+      const newCost = (selectedOverviewItems[index].item.amount * pct) / 100;
+      selectedOverviewItems[index].costToSupplier = newCost;
+
+      const costTd = document.getElementById(`ov-cost-${index}`);
+      if (costTd) {
+        costTd.innerText = "$" + newCost.toLocaleString('en-US', {minimumFractionDigits: 2});
+      }
+
+      let totalCost = 0;
+      let totalChargeback = 0;
+      selectedOverviewItems.forEach(entry => {
+        totalCost += entry.item.amount;
+        totalChargeback += entry.costToSupplier;
+      });
+
+      document.getElementById("overview-banner-total-cost").innerText = "$" + totalCost.toLocaleString('en-US', {minimumFractionDigits: 2});
+      document.getElementById("overview-banner-total-chargeback").innerText = "$" + totalChargeback.toLocaleString('en-US', {minimumFractionDigits: 2});
+    }
+
+    function confirmOverviewChargeback() {
+      if (selectedOverviewItems.length === 0) {
+        showToast("No claims selected for chargeback", "info");
+        return;
+      }
+
+      closeModal("modal-chargeback-overview");
+
+      const supplierName = selectedOverviewItems[0]?.item?.supplier || "Supplier CB";
+      const cbNumber = "Chargeback-26-" + Math.floor(1000 + Math.random() * 9000);
+
+      document.getElementById("cbd-supplier").innerText = supplierName;
+      document.getElementById("cbd-number").innerText = cbNumber;
+      document.getElementById("cbd-date").innerText = "30 Jul 2026";
+      document.getElementById("cbd-end-date").innerText = "30 Jul 2026";
+
+      const copqBody = document.getElementById("cbd-copq-table-body");
+      copqBody.innerHTML = "";
+
+      let totalCopqCost = 0;
+
+      selectedOverviewItems.forEach(entry => {
+        totalCopqCost += entry.costToSupplier;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${entry.item.date}</td>
+          <td><strong style="color:#0284c7;">${entry.item.claimNum}</strong></td>
+          <td><code>${entry.item.seqNum}</code></td>
+          <td>${entry.item.reason}</td>
+          <td>${entry.item.style}</td>
+          <td>${entry.item.colorCd}</td>
+          <td style="text-align:right; font-weight:700; color:#0f172a;">$${entry.costToSupplier.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+        `;
+        copqBody.appendChild(tr);
+      });
+
+      document.getElementById("cbd-total-copq").innerText = "$" + totalCopqCost.toLocaleString('en-US', {minimumFractionDigits:2});
+
+      // Also add to CoPQ Chargeback Requests list
+      const newReq = {
+        number: cbNumber,
+        name: "Supplier CB",
+        date: "30 Jul 2026",
+        initiator: "Norman Hemmings",
+        coordinator: "Norman Hemmings",
+        supplier: supplierName,
+        supplierCoordinator: "Jason Taylor",
+        currency: "US Dollar",
+        cost: totalCopqCost,
+        status: "New"
+      };
+      chargebackRequestsList.unshift(newReq);
+      saveState();
+
+      switchModule('chargeback-detail');
+      showToast("Chargeback overview confirmed! Generated Supplier Chargeback Request.", "success");
+    }
+
+    /* ==================== COPQ CHARGEBACK REQUESTS TABLE RENDERING ==================== */
+    function renderCoPQChargebackRequestsTable() {
+      const tbody = document.getElementById("copq-chargebacks-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const searchVal = (document.getElementById("cbr-search-input")?.value || "").toLowerCase();
+      const statusVal = document.getElementById("cbr-status-filter")?.value || "All";
+
+      let filtered = chargebackRequestsList.filter(item => {
+        if (statusVal !== "All" && item.status !== statusVal) return false;
+        if (searchVal) {
+          const match = Object.values(item).some(val => String(val).toLowerCase().includes(searchVal));
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      filtered.forEach((req) => {
+        const tr = document.createElement("tr");
+
+        let statusBadgeClass = "badge-gray";
+        if (req.status === "New") statusBadgeClass = "badge-blue";
+        else if (req.status === "Chargeback Accepted" || req.status === "Authorised" || req.status === "Fully Paid") statusBadgeClass = "badge-solid-green";
+        else if (req.status === "Chargeback Initiated" || req.status === "Authorization Initiated" || req.status === "Force Chargeback Initiated") statusBadgeClass = "badge-orange";
+        else if (req.status === "Closed") statusBadgeClass = "badge-gray";
+        else if (req.status === "Cancelled") statusBadgeClass = "badge-red";
+
+        tr.innerHTML = `
+          <td style="white-space:nowrap; text-align:center;">
+            <div style="display:flex; gap:6px; align-items:center; justify-content:center;">
+              <button class="btn-tbl-orange" onclick="viewChargebackRequestDetail('${req.number}')" title="Edit Chargeback">✏️</button>
+              <button class="btn-tbl-green" onclick="viewChargebackRequestDetail('${req.number}')" title="View Detail">👁️</button>
+            </div>
+          </td>
+          <td><strong style="color: #0284c7; cursor: pointer;" onclick="viewChargebackRequestDetail('${req.number}')">${req.number}</strong></td>
+          <td>${req.name}</td>
+          <td>${req.date}</td>
+          <td>${req.initiator}</td>
+          <td>${req.coordinator}</td>
+          <td><strong>${req.supplier}</strong></td>
+          <td>${req.supplierCoordinator}</td>
+          <td><span class="badge badge-gray">${req.currency}</span></td>
+          <td style="text-align: right; font-weight: 700; color: #0f172a;">${req.currency === 'Euro' ? '€' : req.currency === 'Indian Rupee' ? '₹' : '$'}${Number(req.cost).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+          <td style="text-align: center;"><span class="badge ${statusBadgeClass}">${req.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function clearCbrFilters() {
+      if (document.getElementById("cbr-search-input")) document.getElementById("cbr-search-input").value = "";
+      if (document.getElementById("cbr-status-filter")) document.getElementById("cbr-status-filter").value = "All";
+      renderCoPQChargebackRequestsTable();
+      showToast("Chargeback request filters cleared", "info");
+    }
+
+    function viewChargebackRequestDetail(reqNum) {
+      const req = chargebackRequestsList.find(r => r.number === reqNum);
+      if (!req) return;
+      document.getElementById("cbd-supplier").innerText = req.supplier;
+      document.getElementById("cbd-number").innerText = req.number;
+      document.getElementById("cbd-date").innerText = req.date;
+      document.getElementById("cbd-end-date").innerText = req.date;
+      document.getElementById("cbd-total-copq").innerText = (req.currency === 'Euro' ? '€' : req.currency === 'Indian Rupee' ? '₹' : '$') + Number(req.cost).toLocaleString('en-US', {minimumFractionDigits: 2});
+
+      switchModule('chargeback-detail');
+    }
+
+    function finalizeInitiatedChargeback() {
+      showToast("⚡ Supplier Chargeback successfully initiated!", "success");
+      selectedChargebackIndexes.clear();
+      switchModule('chargeback');
+    }
+
+    function quickChargebackForSupplier(supplierName) {
+      switchModule('chargeback');
+      document.getElementById("supplier-filter-select").value = supplierName;
+      onSupplierFilterChange();
+    }
+
+    function quickChargebackForClaim(claimId) {
+      const claim = warrantyClaims.find(c => c.id === claimId);
+      if (claim) {
+        switchModule('chargeback');
+        document.getElementById("supplier-filter-select").value = claim.supplier;
+        onSupplierFilterChange();
+        showToast(`Filtered chargeback workspace for supplier: ${claim.supplier}`, "info");
+      }
+    }
+
+    /* ==================== MODALS & FORM LOGIC ==================== */
+    function openNewClaimModal() {
+      document.getElementById("modal-new-claim").classList.add("active");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    function saveNewClaim() {
+      const id = document.getElementById("nc-claim-number").value || "WR-CLM-2026-" + Math.floor(10000 + Math.random() * 90000);
+      const customer = document.getElementById("nc-customer").value;
+      const partNum = document.getElementById("nc-part-num").value || "CUS-GEN-1001";
+      const supplier = document.getElementById("nc-supplier").value;
+
+      if (!customer) {
+        showToast("Please enter Customer name", "info");
+        return;
+      }
+
+      const newClaim = {
+        id: id,
+        claimStatus: "Open",
+        customer: customer,
+        reportDate: "30 Jul 2026",
+        customerPartNumber: partNum,
+        partDetail: document.getElementById("nc-part-detail").value || "Warranty Component Assembly",
+        defectQty: parseInt(document.getElementById("nc-qty").value) || 1,
+        dealerName: document.getElementById("nc-dealer").value || "National Service Center",
+        supplyPlant: document.getElementById("nc-plant").value || "Main Assembly Plant",
+        supplier: supplier,
+        supplierCode: "SUP-NEW-001",
+        actionStatus: "Open",
+        debitAmount: parseFloat(document.getElementById("nc-debit").value) || 1000.00,
+        vin: document.getElementById("nc-vin").value || "1FA6P8CF0H9999999",
+        model: document.getElementById("nc-model").value || "Series 500",
+        meetingDate: "05 Aug 2026",
+        coordinator: document.getElementById("nc-coordinator").value || "Quality Admin",
+        copqStatus: "Pending CoPQ",
+        ncStatus: "NC Open",
+        ncRequired: "Yes",
+        segment: "Supplier"
+      };
+
+      warrantyClaims.unshift(newClaim);
+      saveState();
+      renderWarrantyTable();
+      renderCoPQTable();
+      closeModal("modal-new-claim");
+      showToast(`New Claim ${id} successfully registered!`, "success");
+    }
+
+    function viewClaimDetails(claimId) {
+      const claim = warrantyClaims.find(c => c.id === claimId);
+      if (!claim) return;
+      activeClaimForModal = claim;
+
+      document.getElementById("view-claim-title").innerText = `Claim Details: ${claim.id}`;
+      const body = document.getElementById("view-claim-body");
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:12px; border-radius:8px;">
+          <div>
+            <span class="badge badge-solid-green">${claim.claimStatus}</span>
+            <span class="badge badge-blue" style="margin-left:6px;">${claim.copqStatus}</span>
+          </div>
+          <div style="font-size:16px; font-weight:bold; color:#0284c7;">Debit Amount: $${claim.debitAmount.toLocaleString()}</div>
+        </div>
+
+        <div class="form-grid" style="margin-top:12px;">
+          <div><strong>Customer:</strong> ${claim.customer}</div>
+          <div><strong>Reported Date:</strong> ${claim.reportDate}</div>
+          <div><strong>Part Number:</strong> ${claim.customerPartNumber}</div>
+          <div><strong>Defect Qty:</strong> ${claim.defectQty}</div>
+          <div class="form-group full-width"><strong>Part Detail:</strong> ${claim.partDetail}</div>
+          <div><strong>Supplier:</strong> ${claim.supplier}</div>
+          <div><strong>Supplier Code:</strong> ${claim.supplierCode}</div>
+          <div><strong>Dealer:</strong> ${claim.dealerName}</div>
+          <div><strong>Plant:</strong> ${claim.supplyPlant}</div>
+          <div><strong>VIN:</strong> ${claim.vin}</div>
+          <div><strong>Vehicle Model:</strong> ${claim.model}</div>
+          <div><strong>Meeting Date:</strong> ${claim.meetingDate}</div>
+          <div><strong>Coordinator:</strong> ${claim.coordinator}</div>
+          <div><strong>Non-Conformity:</strong> ${claim.ncStatus}</div>
+          <div><strong>NC Required:</strong> ${claim.ncRequired}</div>
+        </div>
+      `;
+
+      document.getElementById("modal-view-claim").classList.add("active");
+    }
+
+    function modalInitiateCb() {
+      if (activeClaimForModal) {
+        closeModal("modal-view-claim");
+        quickChargebackForClaim(activeClaimForModal.id);
+      }
+    }
+
+    /* ==================== TOAST NOTIFICATION UTILITY ==================== */
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✅' : 'ℹ️'}</span>
+        <div>${message}</div>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

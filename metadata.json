@@ -1,0 +1,6 @@
+{
+  "name": "Warranty CoPQ Chargeback Management",
+  "description": "Warranty, CoPQ, and Chargeback linked management application with claim listing and chargeback initiation workflow.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
