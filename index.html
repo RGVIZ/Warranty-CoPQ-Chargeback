@@ -1115,8 +1115,8 @@
               <button class="segmented-btn" onclick="filterBySegment('Internal', this)">Internal</button>
               <button class="segmented-btn" onclick="filterBySegment('Supplier', this)">Supplier</button>
             </div>
-            <button class="btn-primary" onclick="openInitiateCoPQModal()">
-              <span>💳</span> Initiate CoPQ
+            <button class="btn-primary" onclick="openInitiateChargebackPage()">
+              <span>💳</span> Initiate Chargeback
             </button>
           </div>
         </div>
@@ -1287,67 +1287,227 @@
 
       </div>
 
-      <!-- ==================== VIEW 3: INITIATE CHARGEBACK MODULE ==================== -->
+      <!-- ==================== VIEW 3: INITIATE CHARGEBACK PAGE ==================== -->
       <div id="view-chargeback" class="module-view" style="display: none;">
+        
+        <!-- TOP HEADER & TITLE -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <span>💳</span> Initiate Chargeback
+            </h2>
+            <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Filter warranty claims by Supplier, Category, and Claim Numbers to initiate a chargeback.</p>
+          </div>
+          <button class="btn-icon" style="color: #0284c7; font-weight: 600; font-size: 13px;" onclick="switchModule('warranty')">
+            ← Back to Warranty Listing
+          </button>
+        </div>
 
-        <!-- SUPPLIER & CATEGORY FILTER PANEL & TOP ACTION BAR -->
-        <div class="action-header">
-          <div class="action-left" style="gap:20px; align-items:center; flex-wrap:wrap;">
-            <div>
-              <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Choose Supplier:</label>
-              <select class="input-select" id="supplier-filter-select" style="min-width: 280px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onSupplierFilterChange()">
-                <option value="JIN HENG INTERNATIONAL CO LTD">JIN HENG INTERNATIONAL CO LTD</option>
-                <option value="WON SINH TECHNOLOGY (THAILAND)">WON SINH TECHNOLOGY (THAILAND)</option>
-                <option value="VIETNAM ZHISHANG NEW MATERIALS">VIETNAM ZHISHANG NEW MATERIALS</option>
-                <option value="SS FLOOR COMPANY *WT*USD* CHI">SS FLOOR COMPANY *WT*USD* CHI</option>
-                <option value="ALL">-- Show All Suppliers --</option>
-              </select>
-            </div>
+        <!-- FILTERS PANEL -->
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; background: #ffffff; padding: 16px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px;">
+          
+          <!-- 1. Choose Supplier -->
+          <div>
+            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Choose Supplier:</label>
+            <select class="input-select" id="page-supplier-select" style="min-width: 220px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onPageFilterSupplierOrCategoryChange()">
+              <option value="NONE" selected>-- Select Supplier --</option>
+              <!-- Dynamic Suppliers populated by JS -->
+            </select>
+          </div>
 
-            <div>
-              <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Category:</label>
-              <select class="input-select" id="category-filter-select" style="min-width: 180px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onSupplierFilterChange()">
-                <option value="ALL">-- All Categories --</option>
-                <option value="Product">Product</option>
-                <option value="Labor">Labor</option>
-              </select>
+          <!-- 2. Category -->
+          <div>
+            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Category:</label>
+            <select class="input-select" id="page-category-select" style="min-width: 160px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onPageFilterSupplierOrCategoryChange()">
+              <option value="NONE" selected>-- Select Category --</option>
+              <option value="ALL">-- All Categories --</option>
+              <option value="Product">Product</option>
+              <option value="Labor">Labor</option>
+            </select>
+          </div>
+
+          <!-- 3. Claim Number (Multi-Select) -->
+          <div>
+            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Claim Number (Multi-Select):</label>
+            <div class="multiselect-wrapper" id="page-claim-multiselect-wrapper">
+              <div class="multiselect-trigger" id="page-claim-multiselect-trigger" onclick="togglePageClaimDropdown(event)">
+                <span id="page-claim-multiselect-label">-- Select Claim Number --</span>
+              </div>
+              <div class="multiselect-menu" id="page-claim-multiselect-menu">
+                <div class="multiselect-header">
+                  <span>Claim Numbers</span>
+                  <div>
+                    <button type="button" class="multiselect-header-btn" onclick="selectAllPageClaimsFilter(true)">Select All</button>
+                    <span style="margin: 0 4px; color: #cbd5e1;">|</span>
+                    <button type="button" class="multiselect-header-btn" onclick="selectAllPageClaimsFilter(false)">Clear</button>
+                  </div>
+                </div>
+                <div style="padding: 4px 8px; border-bottom: 1px solid #f1f5f9;">
+                  <input type="text" id="page-claim-search-input" placeholder="Search Claim Number..." style="width: 100%; padding: 4px 8px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 4px;" onkeyup="filterPageClaimOptionsList(this.value)">
+                </div>
+                <div id="page-claim-options-container" style="max-height: 200px; overflow-y: auto;">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="action-right" style="gap:12px; align-items:center;">
-            <button class="btn-primary" style="padding:9px 18px; font-size:13px; font-weight:600;" onclick="executeChargeback()">
-              ⚡ Submit Chargeback Request
+          <!-- 4. Currency -->
+          <div>
+            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Currency:</label>
+            <select class="input-select" id="page-currency-select" style="min-width: 120px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="renderPageInitiateChargebackTables()">
+              <option value="USD" selected>USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="CAD">CAD ($)</option>
+              <option value="INR">INR (₹)</option>
+            </select>
+          </div>
+
+          <div style="margin-left: auto; align-self: flex-end;">
+            <button class="btn-icon" style="padding: 8px 12px; font-size: 12px;" onclick="resetPageInitiateFilters()">
+              ❌ Clear Filters
             </button>
-            <button class="btn-icon" onclick="switchModule('warranty')">← Back to Warranty Claims</button>
           </div>
         </div>
 
-        <!-- INITIATE CHARGEBACK CLAIMS TABLE -->
-        <div class="table-container">
-          <div class="table-scroll">
-            <table class="data-table" id="chargeback-table">
-              <thead>
-                <tr>
-                  <th style="width:40px; text-align:center;">
-                    <input type="checkbox" id="cb-select-all" onchange="toggleSelectAllChargebacks(this)">
-                  </th>
-                  <th>Claim Number</th>
-                  <th>Claim Seq Number</th>
-                  <th>Component</th>
-                  <th>Category</th>
-                  <th style="text-align:right;">Total Claim Amount</th>
-                </tr>
-              </thead>
-              <tbody id="chargeback-table-body">
-                <!-- JS populated rows matching Warranty listing dataset -->
-              </tbody>
-            </table>
+        <!-- SEGREGATED TABLES PER CLAIM NUMBER (PAGE SCROLL, UNCOMPRESSED) -->
+        <div id="page-initiate-tables-container" style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px;">
+          <!-- Rendered tables for each selected Claim Number -->
+        </div>
+
+        <!-- BOTTOM ACTION FOOTER -->
+        <div style="position: sticky; bottom: 0; background: #ffffff; padding: 14px 20px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+          <div id="page-initiate-records-count" style="font-weight: 600; font-size: 13px; color: #475569;">
+            Showing 0 tables
           </div>
 
-          <div class="table-footer">
-            <div id="cb-records-count">Showing 0 of 0 records</div>
-            <div style="font-weight:600; color:#0284c7;" id="cb-table-sum">Supplier Total: $0.00</div>
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <div id="page-initiate-summary-total" style="font-size: 15px; font-weight: 800; color: #0284c7;">
+              Selected Chargeback Total: $0.00
+            </div>
+
+            <button class="btn-primary" style="padding: 10px 22px; font-size: 14px; font-weight: 700; border-radius: 6px;" onclick="proceedToChargebackCreatePage()">
+              Create Chargeback
+            </button>
           </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== VIEW 3.5: CHARGEBACK CREATE PAGE ==================== -->
+      <div id="view-chargeback-create" class="module-view" style="display: none;">
+        
+        <!-- BREADCRUMB & HEADER -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <span>📄</span> Chargeback Create Page
+            </h2>
+            <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Review and complete the chargeback details before generating the formal request.</p>
+          </div>
+          <button class="btn-icon" style="color: #64748b; font-weight: 600; font-size: 13px;" onclick="cancelChargebackCreate()">
+            ✕ Cancel & Back to Warranty
+          </button>
+        </div>
+
+        <!-- MAIN FORM CARD -->
+        <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px;">
+          
+          <div style="font-size: 14px; font-weight: 800; color: #0284c7; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; align-items: center; gap: 6px;">
+            <span>ℹ️</span> Basic Information
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px 24px;">
+            
+            <!-- 1. Chargeback Number (System Generated) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">1. Chargeback Number (System Generated):</label>
+              <input type="text" id="create-cb-number" class="input-text" readonly style="background: #f1f5f9; font-weight: 800; color: #0284c7; cursor: not-allowed;">
+            </div>
+
+            <!-- 2. Name (Single line text field) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">2. Name (Single line text field) <span style="color:#ef4444;">*</span>:</label>
+              <input type="text" id="create-cb-name" class="input-text" placeholder="Enter Chargeback Name...">
+            </div>
+
+            <!-- 3. Initiator (Logged in User) (Non-Editable) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">3. Initiator (Logged in User) (Non-Editable):</label>
+              <input type="text" id="create-cb-initiator" class="input-text" value="admin" readonly style="background: #f1f5f9; font-weight: 600; color: #334155; cursor: not-allowed;">
+            </div>
+
+            <!-- 4. Initiation Date (Current Date) (Editable) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">4. Initiation Date (Current Date) (Editable) <span style="color:#ef4444;">*</span>:</label>
+              <input type="text" id="create-cb-date" class="input-text" style="font-weight: 600; color: #0f172a;">
+            </div>
+
+            <!-- 5. Coordinator (User Dropdown) (Multi-Select) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">5. Coordinator (User Dropdown) (Multi-Select):</label>
+              <div class="multiselect-wrapper" id="coord-multiselect-wrapper">
+                <div class="multiselect-trigger" onclick="toggleCoordDropdown(event)">
+                  <span id="coord-multiselect-label">John Chen, Michael Wong</span>
+                </div>
+                <div class="multiselect-menu" id="coord-multiselect-menu">
+                  <div class="multiselect-header">
+                    <span>Select Coordinators</span>
+                  </div>
+                  <div id="coord-options-container" style="max-height: 160px; overflow-y: auto;">
+                    <!-- JS Populated -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. Supplier (Auto-filled from Warranty) (Non-Editable) (Single) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">6. Supplier (Auto-filled from Warranty) (Non-Editable):</label>
+              <input type="text" id="create-cb-supplier" class="input-text" readonly style="background: #f1f5f9; font-weight: 700; color: #0f172a; cursor: not-allowed;">
+            </div>
+
+            <!-- 7. Supplier Coordinator (Auto-filled based on Claim Number) (Editable) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">7. Supplier Coordinator (Editable):</label>
+              <input type="text" id="create-cb-supplier-coord" class="input-text" style="font-weight: 600; color: #0f172a;">
+            </div>
+
+            <!-- 8. Currency (Auto-filled based on claim number) (Single) (Non-Editable) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">8. Currency (Auto-filled from Warranty) (Non-Editable):</label>
+              <input type="text" id="create-cb-currency" class="input-text" readonly style="background: #f1f5f9; font-weight: 700; color: #0f172a; cursor: not-allowed;">
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CLAIMS BEING CHARGED BACK SUMMARY -->
+        <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px;">
+          <div style="font-size: 14px; font-weight: 800; color: #0284c7; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <span>📋 Claims Included in this Chargeback</span>
+            <span id="create-cb-claims-count-badge" class="badge badge-blue">0 Claims Selected</span>
+          </div>
+
+          <div id="create-cb-claims-tables-preview" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Preview of tables being converted to chargeback -->
+          </div>
+
+          <div style="margin-top: 16px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 700; color: #475569;">Grand Total Cost to Supplier:</span>
+            <span id="create-cb-grand-total" style="font-size: 18px; font-weight: 800; color: #0f172a;">$0.00</span>
+          </div>
+        </div>
+
+        <!-- PAGE BOTTOM BUTTONS -->
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 30px;">
+          <button class="btn-outline-danger" style="padding: 10px 20px; font-weight: 700; font-size: 13px;" onclick="cancelChargebackCreate()">
+            Cancel
+          </button>
+          <button class="btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 13px; border-radius: 6px;" onclick="submitFinalChargebackCreate()">
+            Create
+          </button>
         </div>
 
       </div>
@@ -2104,7 +2264,12 @@
       const vCbr = document.getElementById("view-copq-chargebacks");
       if (vCbr) vCbr.style.display = moduleName === 'copq-chargebacks' ? 'block' : 'none';
       
-      document.getElementById("view-chargeback").style.display = moduleName === 'chargeback' ? 'block' : 'none';
+      const vCb = document.getElementById("view-chargeback");
+      if (vCb) vCb.style.display = moduleName === 'chargeback' ? 'block' : 'none';
+
+      const vCbCreate = document.getElementById("view-chargeback-create");
+      if (vCbCreate) vCbCreate.style.display = moduleName === 'chargeback-create' ? 'block' : 'none';
+
       const viewDetail = document.getElementById("view-chargeback-detail");
       if (viewDetail) viewDetail.style.display = moduleName === 'chargeback-detail' ? 'block' : 'none';
 
@@ -2127,14 +2292,14 @@
         'copq-elements': 'CoPQ Elements',
         copq: 'CoPQ Elements',
         'copq-chargebacks': 'Chargeback Requests',
-        chargeback: 'Initiate CoPQ',
-        'chargeback-detail': 'View Supplier Chargeback'
+        chargeback: 'Initiate Chargeback',
+        'chargeback-create': 'Chargeback Create Page',
+        'chargeback-detail': 'Chargeback View Page'
       };
       document.getElementById("breadcrumb-current").innerText = titles[moduleName] || 'Claims';
 
       if (moduleName === 'chargeback') {
-        renderComponentOptions();
-        onSupplierFilterChange();
+        renderPageInitiateChargebackTables();
       } else if (moduleName === 'copq-chargebacks') {
         renderCoPQChargebackRequestsTable();
       } else if (moduleName === 'copq-elements' || moduleName === 'copq') {
@@ -2426,183 +2591,189 @@
         const popupMenu = document.getElementById("popup-claim-multiselect-menu");
         if (popupMenu) popupMenu.classList.remove("show");
       }
+      const pageClaimWrapper = document.getElementById("page-claim-multiselect-wrapper");
+      if (pageClaimWrapper && !pageClaimWrapper.contains(e.target)) {
+        const pageMenu = document.getElementById("page-claim-multiselect-menu");
+        if (pageMenu) pageMenu.classList.remove("show");
+      }
+      const coordWrapper = document.getElementById("coord-multiselect-wrapper");
+      if (coordWrapper && !coordWrapper.contains(e.target)) {
+        const coordMenu = document.getElementById("coord-multiselect-menu");
+        if (coordMenu) coordMenu.classList.remove("show");
+      }
     });
 
-    /* ==================== INITIATE COPQ POP-UP MODAL & VIEW 3 LOGIC ==================== */
-    let selectedPopUpClaimNumbers = [];
-    let allPopUpClaimNumbers = [];
+    /* ==================== INITIATE CHARGEBACK PAGE LOGIC ==================== */
+    let selectedPageClaimNumbers = [];
+    let allPageClaimNumbers = [];
+
+    function openInitiateChargebackPage() {
+      resetPageInitiateFilters();
+      switchModule('chargeback');
+    }
 
     function openInitiateCoPQModal() {
-      populatePopUpSuppliers();
-      onPopUpFilterSupplierOrCategoryChange();
-      openModal('modal-initiate-copq');
+      openInitiateChargebackPage();
     }
 
-    function populatePopUpSuppliers() {
-      const popupSupSelect = document.getElementById("popup-supplier-select");
-      if (!popupSupSelect) return;
+    function resetPageInitiateFilters() {
+      selectedPageClaimNumbers = [];
+      allPageClaimNumbers = [];
       
-      const currentVal = popupSupSelect.value || "ALL";
-      popupSupSelect.innerHTML = "";
+      populatePageSuppliersDropdown();
       
-      const suppliers = Array.from(new Set(warrantyClaims.map(c => c.supplier))).filter(Boolean).sort();
+      const supSelect = document.getElementById("page-supplier-select");
+      if (supSelect) supSelect.value = "NONE";
       
-      const allOpt = document.createElement("option");
-      allOpt.value = "ALL";
-      allOpt.innerText = "-- Show All Suppliers --";
-      popupSupSelect.appendChild(allOpt);
+      const catSelect = document.getElementById("page-category-select");
+      if (catSelect) catSelect.value = "NONE";
       
-      suppliers.forEach(s => {
+      const currSelect = document.getElementById("page-currency-select");
+      if (currSelect) currSelect.value = "USD";
+      
+      populatePageClaimNumbersDropdown();
+      renderPageInitiateChargebackTables();
+    }
+
+    function populatePageSuppliersDropdown() {
+      const select = document.getElementById("page-supplier-select");
+      if (!select) return;
+      const currentVal = select.value || "NONE";
+      
+      const suppliers = Array.from(new Set(warrantyClaims.map(c => c.supplier).filter(Boolean))).sort();
+      select.innerHTML = `<option value="NONE">-- Select Supplier --</option><option value="ALL">-- All Suppliers --</option>`;
+      suppliers.forEach(sup => {
         const opt = document.createElement("option");
-        opt.value = s;
-        opt.innerText = s;
-        if (s === currentVal) opt.selected = true;
-        popupSupSelect.appendChild(opt);
+        opt.value = sup;
+        opt.textContent = sup;
+        select.appendChild(opt);
       });
-
-      // Also sync View 3 supplier filter dropdown options
-      const view3SupSelect = document.getElementById("supplier-filter-select");
-      if (view3SupSelect) {
-        const view3Val = view3SupSelect.value || "ALL";
-        view3SupSelect.innerHTML = "";
-        const v3AllOpt = document.createElement("option");
-        v3AllOpt.value = "ALL";
-        v3AllOpt.innerText = "-- Show All Suppliers --";
-        view3SupSelect.appendChild(v3AllOpt);
-        suppliers.forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s;
-          opt.innerText = s;
-          if (s === view3Val) opt.selected = true;
-          view3SupSelect.appendChild(opt);
-        });
-      }
-    }
-
-    function onPopUpFilterSupplierOrCategoryChange() {
-      populatePopUpClaimNumbers();
-      renderPopUpCoPQTable();
-    }
-
-    function populatePopUpClaimNumbers() {
-      const supVal = document.getElementById("popup-supplier-select")?.value || "ALL";
-      const catVal = document.getElementById("popup-category-select")?.value || "ALL";
-
-      let filtered = warrantyClaims.filter(claim => {
-        if (supVal !== "ALL" && claim.supplier !== supVal) return false;
-        if (catVal !== "ALL" && claim.category !== catVal) return false;
-        return true;
-      });
-
-      // Extract unique non-duplicated Claim Numbers
-      const uniqueClaims = Array.from(new Set(filtered.map(c => c.claimNumber || '600064226'))).sort();
-      allPopUpClaimNumbers = uniqueClaims;
-
-      // Maintain selection or default to all unique claim numbers
-      if (selectedPopUpClaimNumbers.length === 0) {
-        selectedPopUpClaimNumbers = [...uniqueClaims];
+      if (currentVal && Array.from(select.options).some(o => o.value === currentVal)) {
+        select.value = currentVal;
       } else {
-        selectedPopUpClaimNumbers = selectedPopUpClaimNumbers.filter(cn => uniqueClaims.includes(cn));
-        if (selectedPopUpClaimNumbers.length === 0 && uniqueClaims.length > 0) {
-          selectedPopUpClaimNumbers = [...uniqueClaims];
-        }
+        select.value = "NONE";
       }
-
-      renderPopUpClaimOptionsList();
-      updatePopUpClaimMultiselectLabel();
     }
 
-    function renderPopUpClaimOptionsList() {
-      const container = document.getElementById("popup-claim-options-container");
-      if (!container) return;
-      container.innerHTML = "";
+    function onPageFilterSupplierOrCategoryChange() {
+      populatePageClaimNumbersDropdown();
+      renderPageInitiateChargebackTables();
+    }
 
-      if (allPopUpClaimNumbers.length === 0) {
-        container.innerHTML = `<div style="padding:8px 12px; font-size:12px; color:#94a3b8;">No Claim Numbers available</div>`;
+    function populatePageClaimNumbersDropdown() {
+      const supVal = document.getElementById("page-supplier-select")?.value || "NONE";
+      const catVal = document.getElementById("page-category-select")?.value || "NONE";
+
+      if (supVal === "NONE" && catVal === "NONE") {
+        allPageClaimNumbers = [];
+        selectedPageClaimNumbers = [];
+        renderPageClaimOptionsList();
+        updatePageClaimMultiselectLabel();
         return;
       }
 
-      allPopUpClaimNumbers.forEach(cn => {
-        const isChecked = selectedPopUpClaimNumbers.includes(cn);
+      let filtered = warrantyClaims.filter(claim => {
+        if (supVal !== "NONE" && supVal !== "ALL" && claim.supplier !== supVal) return false;
+        if (catVal !== "NONE" && catVal !== "ALL" && claim.category !== catVal) return false;
+        return true;
+      });
+
+      const uniqueClaims = Array.from(new Set(filtered.map(c => c.claimNumber || '600064226'))).sort();
+      allPageClaimNumbers = uniqueClaims;
+
+      selectedPageClaimNumbers = selectedPageClaimNumbers.filter(cn => uniqueClaims.includes(cn));
+
+      renderPageClaimOptionsList();
+      updatePageClaimMultiselectLabel();
+    }
+
+    function renderPageClaimOptionsList() {
+      const container = document.getElementById("page-claim-options-container");
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (allPageClaimNumbers.length === 0) {
+        container.innerHTML = `<div style="padding:8px 12px; font-size:12px; color:#94a3b8;">No Claim Numbers available for selected filters</div>`;
+        return;
+      }
+
+      allPageClaimNumbers.forEach(cn => {
+        const isChecked = selectedPageClaimNumbers.includes(cn);
         const div = document.createElement("div");
-        div.className = "multiselect-option popup-claim-opt-item";
+        div.className = "multiselect-option page-claim-opt-item";
         div.setAttribute("data-cn", cn);
         div.onclick = (e) => {
           if (e.target.tagName !== 'INPUT') {
             const chk = div.querySelector('input[type="checkbox"]');
             if (chk) {
               chk.checked = !chk.checked;
-              onPopUpClaimOptionToggle(cn, chk.checked);
+              onPageClaimOptionToggle(cn, chk.checked);
             }
           }
         };
 
         div.innerHTML = `
-          <input type="checkbox" value="${cn}" ${isChecked ? 'checked' : ''} onchange="onPopUpClaimOptionToggle('${cn}', this.checked)">
+          <input type="checkbox" value="${cn}" ${isChecked ? 'checked' : ''} onchange="onPageClaimOptionToggle('${cn}', this.checked)">
           <span>${cn}</span>
         `;
         container.appendChild(div);
       });
     }
 
-    function filterPopUpClaimOptionsList(query) {
+    function filterPageClaimOptionsList(query) {
       const q = (query || "").toLowerCase();
-      const items = document.querySelectorAll(".popup-claim-opt-item");
+      const items = document.querySelectorAll(".page-claim-opt-item");
       items.forEach(item => {
         const cn = (item.getAttribute("data-cn") || "").toLowerCase();
-        if (cn.includes(q)) {
-          item.style.display = "flex";
-        } else {
-          item.style.display = "none";
-        }
+        item.style.display = cn.includes(q) ? "flex" : "none";
       });
     }
 
-    function togglePopUpClaimDropdown(e) {
-      e.stopPropagation();
-      const menu = document.getElementById("popup-claim-multiselect-menu");
+    function togglePageClaimDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("page-claim-multiselect-menu");
       if (menu) menu.classList.toggle("show");
     }
 
-    function onPopUpClaimOptionToggle(cn, isChecked) {
+    function onPageClaimOptionToggle(cn, isChecked) {
       if (isChecked) {
-        if (!selectedPopUpClaimNumbers.includes(cn)) selectedPopUpClaimNumbers.push(cn);
+        if (!selectedPageClaimNumbers.includes(cn)) selectedPageClaimNumbers.push(cn);
       } else {
-        selectedPopUpClaimNumbers = selectedPopUpClaimNumbers.filter(x => x !== cn);
+        selectedPageClaimNumbers = selectedPageClaimNumbers.filter(x => x !== cn);
       }
-      updatePopUpClaimMultiselectLabel();
-      renderPopUpCoPQTable();
+      updatePageClaimMultiselectLabel();
+      renderPageInitiateChargebackTables();
     }
 
-    function selectAllPopUpClaimsFilter(shouldSelect) {
+    function selectAllPageClaimsFilter(shouldSelect) {
       if (shouldSelect) {
-        selectedPopUpClaimNumbers = [...allPopUpClaimNumbers];
+        selectedPageClaimNumbers = [...allPageClaimNumbers];
       } else {
-        selectedPopUpClaimNumbers = [];
+        selectedPageClaimNumbers = [];
       }
-      const checkboxes = document.querySelectorAll("#popup-claim-options-container input[type='checkbox']");
+      const checkboxes = document.querySelectorAll("#page-claim-options-container input[type='checkbox']");
       checkboxes.forEach(chk => { chk.checked = shouldSelect; });
-      updatePopUpClaimMultiselectLabel();
-      renderPopUpCoPQTable();
+      updatePageClaimMultiselectLabel();
+      renderPageInitiateChargebackTables();
     }
 
-    function updatePopUpClaimMultiselectLabel() {
-      const labelEl = document.getElementById("popup-claim-multiselect-label");
+    function updatePageClaimMultiselectLabel() {
+      const labelEl = document.getElementById("page-claim-multiselect-label");
       if (!labelEl) return;
 
-      if (selectedPopUpClaimNumbers.length === 0) {
+      if (selectedPageClaimNumbers.length === 0) {
         labelEl.innerText = "-- Select Claim Number --";
-      } else if (selectedPopUpClaimNumbers.length === allPopUpClaimNumbers.length) {
-        labelEl.innerText = `-- All Claims (${allPopUpClaimNumbers.length}) --`;
-      } else if (selectedPopUpClaimNumbers.length === 1) {
-        labelEl.innerText = selectedPopUpClaimNumbers[0];
+      } else if (selectedPageClaimNumbers.length === allPageClaimNumbers.length) {
+        labelEl.innerText = `-- All Claims (${allPageClaimNumbers.length}) --`;
+      } else if (selectedPageClaimNumbers.length === 1) {
+        labelEl.innerText = selectedPageClaimNumbers[0];
       } else {
-        labelEl.innerText = `${selectedPopUpClaimNumbers.length} Claims Selected`;
+        labelEl.innerText = `${selectedPageClaimNumbers.length} Claims Selected`;
       }
     }
 
-    function getCurrencySymbol() {
-      const curr = document.getElementById("popup-currency-select")?.value || "USD";
+    function getPageCurrencySymbol() {
+      const curr = document.getElementById("page-currency-select")?.value || "USD";
       switch(curr) {
         case "EUR": return "€";
         case "GBP": return "£";
@@ -2613,22 +2784,35 @@
       }
     }
 
-    function renderPopUpCoPQTable() {
-      const supVal = document.getElementById("popup-supplier-select")?.value || "ALL";
-      const catVal = document.getElementById("popup-category-select")?.value || "ALL";
-      const currencySymbol = getCurrencySymbol();
+    function renderPageInitiateChargebackTables() {
+      const supVal = document.getElementById("page-supplier-select")?.value || "NONE";
+      const catVal = document.getElementById("page-category-select")?.value || "NONE";
+      const currencySymbol = getPageCurrencySymbol();
       
-      const container = document.getElementById("popup-copq-tables-container");
+      const container = document.getElementById("page-initiate-tables-container");
       if (!container) return;
       container.innerHTML = "";
 
+      if (selectedPageClaimNumbers.length === 0) {
+        container.innerHTML = `
+          <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:40px 20px; text-align:center; color:#64748b;">
+            <div style="font-size:32px; margin-bottom:8px;">📋</div>
+            <div style="font-weight:700; font-size:15px; color:#334155;">No Claim Numbers selected</div>
+            <div style="font-size:13px; margin-top:4px;">By default, no values are selected in filters and tables are blank. Select a Supplier, Category, or Claim Numbers above to view records.</div>
+          </div>
+        `;
+        document.getElementById("page-initiate-records-count").innerText = "Showing 0 tables";
+        document.getElementById("page-initiate-summary-total").innerText = `Selected Chargeback Total: ${currencySymbol}0.00`;
+        return;
+      }
+
       let filtered = warrantyClaims.filter(claim => {
-        if (supVal !== "ALL" && claim.supplier !== supVal) return false;
-        if (catVal !== "ALL" && claim.category !== catVal) return false;
-        return true;
+        if (supVal !== "NONE" && supVal !== "ALL" && claim.supplier !== supVal) return false;
+        if (catVal !== "NONE" && catVal !== "ALL" && claim.category !== catVal) return false;
+        const cn = claim.claimNumber || '600064226';
+        return selectedPageClaimNumbers.includes(cn);
       });
 
-      // Group by claimNumber
       const groupedByClaim = {};
       filtered.forEach(claim => {
         const cn = claim.claimNumber || '600064226';
@@ -2636,32 +2820,18 @@
         groupedByClaim[cn].push(claim);
       });
 
-      // Get claim numbers that are selected in multi-select filter
-      const activeClaimNumbers = Object.keys(groupedByClaim).filter(cn => selectedPopUpClaimNumbers.includes(cn)).sort();
-
-      if (activeClaimNumbers.length === 0) {
-        container.innerHTML = `
-          <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:32px; text-align:center; color:#64748b;">
-            <div style="font-size:24px; margin-bottom:8px;">📋</div>
-            <div style="font-weight:700; font-size:14px; color:#334155;">No Claim Numbers selected or no records found</div>
-            <div style="font-size:12px; margin-top:4px;">Try selecting Claim Numbers from the filter above or changing Supplier/Category.</div>
-          </div>
-        `;
-        const cntEl = document.getElementById("popup-records-count");
-        if (cntEl) cntEl.innerText = `Showing 0 tables (0 records)`;
-        updatePopUpSummary();
-        return;
-      }
-
+      const activeClaimNumbers = Object.keys(groupedByClaim).sort();
       let totalRecordsCount = 0;
+      let grandTotalAmount = 0;
 
       activeClaimNumbers.forEach(cn => {
         const claimsList = groupedByClaim[cn];
         totalRecordsCount += claimsList.length;
         const tableTotal = claimsList.reduce((acc, c) => acc + parseFloat(c.debitAmount || 0), 0);
+        grandTotalAmount += tableTotal;
 
         const card = document.createElement("div");
-        card.className = "copq-claim-card";
+        card.className = "initiate-claim-card";
         card.setAttribute("data-claim-number", cn);
         card.setAttribute("data-table-amount", tableTotal);
         card.style.cssText = "border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);";
@@ -2671,24 +2841,23 @@
           const catBadgeClass = (claim.category === 'Labor' || claim.category === 'Labour') ? 'badge-orange' : 'badge-blue';
           rowsHtml += `
             <tr style="border-bottom: 1px solid #f1f5f9;">
-              <td style="padding: 8px 12px; font-size: 13px;"><strong style="color:#1e293b;">${claim.claimNumber || '600064226'}</strong></td>
-              <td style="padding: 8px 12px; font-size: 13px;"><strong style="color:#0284c7;">${claim.id}</strong></td>
-              <td style="padding: 8px 12px; font-size: 13px;"><span class="badge badge-gray">${claim.component || 'Product Line'}</span></td>
-              <td style="padding: 8px 12px; font-size: 13px;"><span class="badge ${catBadgeClass}">${claim.category || 'Product'}</span></td>
-              <td style="padding: 8px 12px; font-size: 13px; font-weight: 700; color:#0f172a; text-align: right;">${currencySymbol}${Number(claim.debitAmount || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+              <td style="padding: 10px 14px; font-size: 13px;"><strong style="color:#1e293b;">${claim.claimNumber || '600064226'}</strong></td>
+              <td style="padding: 10px 14px; font-size: 13px;"><strong style="color:#0284c7;">${claim.id}</strong></td>
+              <td style="padding: 10px 14px; font-size: 13px;"><span class="badge badge-gray">${claim.component || 'Product Line'}</span></td>
+              <td style="padding: 10px 14px; font-size: 13px;"><span class="badge ${catBadgeClass}">${claim.category || 'Product'}</span></td>
+              <td style="padding: 10px 14px; font-size: 13px; font-weight: 700; color:#0f172a; text-align: right;">${currencySymbol}${Number(claim.debitAmount || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
             </tr>
           `;
         });
 
         card.innerHTML = `
-          <!-- TABLE HEADER CARD -->
-          <div style="background: #f1f5f9; padding: 10px 14px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
+          <!-- TABLE HEADER CARD (NO CHECKBOX AS REQUESTED) -->
+          <div style="background: #f1f5f9; padding: 12px 16px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <input type="checkbox" class="popup-table-checkbox" data-claim-number="${cn}" data-amount="${tableTotal}" checked onchange="updatePopUpSummary()" style="width: 16px; height: 16px; cursor: pointer;">
               <span style="font-weight: 800; font-size: 14px; color: #0f172a;">Claim Number: ${cn}</span>
               <span class="badge badge-blue" style="font-size:11px;">${claimsList.length} Record(s)</span>
             </div>
-            <div style="font-weight: 700; font-size: 13px; color: #0284c7;">
+            <div style="font-weight: 800; font-size: 14px; color: #0284c7;">
               Overall Cost: ${currencySymbol}${tableTotal.toLocaleString('en-US', {minimumFractionDigits:2})}
             </div>
           </div>
@@ -2698,11 +2867,11 @@
             <table class="data-table" style="width: 100%; border-collapse: collapse; margin: 0;">
               <thead>
                 <tr style="background: #fafafa; border-bottom: 1px solid #e2e8f0;">
-                  <th style="padding: 8px 12px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Claim Number</th>
-                  <th style="padding: 8px 12px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Claim Seq Number</th>
-                  <th style="padding: 8px 12px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Component</th>
-                  <th style="padding: 8px 12px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Category</th>
-                  <th style="padding: 8px 12px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b; text-align: right;">Total Claim Amount</th>
+                  <th style="padding: 10px 14px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Claim Number</th>
+                  <th style="padding: 10px 14px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Claim Seq Number</th>
+                  <th style="padding: 10px 14px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Component</th>
+                  <th style="padding: 10px 14px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b;">Category</th>
+                  <th style="padding: 10px 14px; font-size: 11px; font-weight:700; text-transform:uppercase; color:#64748b; text-align: right;">Total Claim Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -2710,8 +2879,8 @@
               </tbody>
               <tfoot>
                 <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #e2e8f0;">
-                  <td colspan="4" style="text-align: right; padding: 8px 12px; font-size: 12px; color: #475569;">Overall Cost for Claim ${cn}:</td>
-                  <td style="text-align: right; padding: 8px 12px; font-size: 13px; color: #0f172a; font-weight:800;">${currencySymbol}${tableTotal.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+                  <td colspan="4" style="text-align: right; padding: 10px 14px; font-size: 12px; color: #475569;">Overall Cost for Claim ${cn}:</td>
+                  <td style="text-align: right; padding: 10px 14px; font-size: 13px; color: #0f172a; font-weight:800;">${currencySymbol}${tableTotal.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
                 </tr>
               </tfoot>
             </table>
@@ -2721,79 +2890,241 @@
         container.appendChild(card);
       });
 
-      const cntEl = document.getElementById("popup-records-count");
-      if (cntEl) cntEl.innerText = `Showing ${activeClaimNumbers.length} Table(s) (${totalRecordsCount} Records)`;
-
-      updatePopUpSummary();
+      document.getElementById("page-initiate-records-count").innerText = `Showing ${activeClaimNumbers.length} Table(s) (${totalRecordsCount} Records)`;
+      document.getElementById("page-initiate-summary-total").innerText = `Selected Chargeback Total: ${currencySymbol}${grandTotalAmount.toLocaleString('en-US', {minimumFractionDigits:2})}`;
     }
 
-    function updatePopUpSummary() {
-      const tableCheckboxes = document.querySelectorAll(".popup-table-checkbox");
-      let checkedCount = 0;
-      let totalAmount = 0;
-      const currencySymbol = getCurrencySymbol();
+    /* ==================== CHARGEBACK CREATE PAGE LOGIC ==================== */
+    let pendingChargebackData = null;
+    let selectedCoordinators = ["John Chen", "Michael Wong"];
 
-      tableCheckboxes.forEach(chk => {
-        if (chk.checked) {
-          checkedCount++;
-          totalAmount += parseFloat(chk.getAttribute("data-amount") || 0);
-        }
-      });
-
-      const sumEl = document.getElementById("popup-table-sum");
-      if (sumEl) sumEl.innerText = `Selected CoPQ Total (${checkedCount} Tables): ${currencySymbol}${totalAmount.toLocaleString('en-US', {minimumFractionDigits:2})}`;
-    }
-
-    function submitPopUpChargeback() {
-      const checkedBoxes = document.querySelectorAll(".popup-table-checkbox:checked");
-      if (checkedBoxes.length === 0) {
-        showToast("Please select at least one Claim Number / Table checkbox to create CoPQ", "info");
+    function proceedToChargebackCreatePage() {
+      if (selectedPageClaimNumbers.length === 0) {
+        showToast("Please select at least one Claim Number from the filter to create a chargeback", "info");
         return;
       }
 
-      const currency = document.getElementById("popup-currency-select")?.value || "USD";
-      const currencySymbol = getCurrencySymbol();
-      let grandTotal = 0;
-      const initiatedClaimNumbers = [];
+      const supVal = document.getElementById("page-supplier-select")?.value;
+      let primarySupplier = (supVal && supVal !== "NONE" && supVal !== "ALL") ? supVal : "";
 
-      checkedBoxes.forEach(chk => {
-        const cn = chk.getAttribute("data-claim-number");
-        const amt = parseFloat(chk.getAttribute("data-amount") || 0);
-        grandTotal += amt;
-        initiatedClaimNumbers.push(cn);
+      let matchedClaims = warrantyClaims.filter(c => selectedPageClaimNumbers.includes(c.claimNumber || '600064226'));
+      if (!primarySupplier && matchedClaims.length > 0) {
+        primarySupplier = matchedClaims[0].supplier || "JIN HENG INTERNATIONAL CO LTD";
+      }
+      if (!primarySupplier) primarySupplier = "JIN HENG INTERNATIONAL CO LTD";
 
-        // Update records in warrantyClaims
-        warrantyClaims.forEach(claim => {
-          if ((claim.claimNumber || '600064226') === cn) {
-            claim.actionStatus = "Action Required";
-            claim.copqStatus = "CoPQ Assessed";
+      const currencyVal = document.getElementById("page-currency-select")?.value || "USD";
+      const currencySymbol = getPageCurrencySymbol();
+      const generatedCbNumber = `CB-REQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const currentDateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+      let grandTotal = matchedClaims.reduce((sum, c) => sum + parseFloat(c.debitAmount || 0), 0);
+      const supplierCoord = "Li Wei (Supplier Coordinator)";
+
+      pendingChargebackData = {
+        cbNumber: generatedCbNumber,
+        name: `Chargeback Request - ${primarySupplier}`,
+        initiator: "admin",
+        initiationDate: currentDateStr,
+        coordinators: [...selectedCoordinators],
+        supplier: primarySupplier,
+        supplierCoordinator: supplierCoord,
+        currency: currencyVal,
+        currencySymbol: currencySymbol,
+        grandTotal: grandTotal,
+        claims: matchedClaims,
+        selectedClaimNumbers: [...selectedPageClaimNumbers]
+      };
+
+      document.getElementById("create-cb-number").value = pendingChargebackData.cbNumber;
+      document.getElementById("create-cb-name").value = pendingChargebackData.name;
+      document.getElementById("create-cb-initiator").value = pendingChargebackData.initiator;
+      document.getElementById("create-cb-date").value = pendingChargebackData.initiationDate;
+      document.getElementById("create-cb-supplier").value = pendingChargebackData.supplier;
+      document.getElementById("create-cb-supplier-coord").value = pendingChargebackData.supplierCoordinator;
+      document.getElementById("create-cb-currency").value = `${pendingChargebackData.currency} (${pendingChargebackData.currencySymbol})`;
+
+      renderCoordinatorOptions();
+      renderCreatePageClaimsPreview();
+
+      switchModule('chargeback-create');
+    }
+
+    function renderCoordinatorOptions() {
+      const container = document.getElementById("coord-options-container");
+      if (!container) return;
+      const allCoords = ["John Chen", "Michael Wong", "Sarah Jenkins", "David Miller", "Emma Davis"];
+      container.innerHTML = "";
+
+      allCoords.forEach(coord => {
+        const isChecked = selectedCoordinators.includes(coord);
+        const div = document.createElement("div");
+        div.className = "multiselect-option";
+        div.onclick = (e) => {
+          if (e.target.tagName !== 'INPUT') {
+            const chk = div.querySelector('input[type="checkbox"]');
+            if (chk) {
+              chk.checked = !chk.checked;
+              onCoordOptionToggle(coord, chk.checked);
+            }
           }
+        };
+        div.innerHTML = `
+          <input type="checkbox" value="${coord}" ${isChecked ? 'checked' : ''} onchange="onCoordOptionToggle('${coord}', this.checked)">
+          <span>${coord}</span>
+        `;
+        container.appendChild(div);
+      });
+      updateCoordMultiselectLabel();
+    }
+
+    function toggleCoordDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("coord-multiselect-menu");
+      if (menu) menu.classList.toggle("show");
+    }
+
+    function onCoordOptionToggle(coord, isChecked) {
+      if (isChecked) {
+        if (!selectedCoordinators.includes(coord)) selectedCoordinators.push(coord);
+      } else {
+        selectedCoordinators = selectedCoordinators.filter(c => c !== coord);
+      }
+      updateCoordMultiselectLabel();
+    }
+
+    function updateCoordMultiselectLabel() {
+      const labelEl = document.getElementById("coord-multiselect-label");
+      if (!labelEl) return;
+      if (selectedCoordinators.length === 0) {
+        labelEl.innerText = "-- Select Coordinator --";
+      } else {
+        labelEl.innerText = selectedCoordinators.join(", ");
+      }
+    }
+
+    function renderCreatePageClaimsPreview() {
+      const container = document.getElementById("create-cb-claims-tables-preview");
+      if (!container || !pendingChargebackData) return;
+      container.innerHTML = "";
+
+      const symbol = pendingChargebackData.currencySymbol;
+      const badgeEl = document.getElementById("create-cb-claims-count-badge");
+      if (badgeEl) badgeEl.innerText = `${pendingChargebackData.claims.length} Record(s) in ${pendingChargebackData.selectedClaimNumbers.length} Claim(s)`;
+
+      document.getElementById("create-cb-grand-total").innerText = `${symbol}${pendingChargebackData.grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+      const grouped = {};
+      pendingChargebackData.claims.forEach(c => {
+        const cn = c.claimNumber || '600064226';
+        if (!grouped[cn]) grouped[cn] = [];
+        grouped[cn].push(c);
+      });
+
+      Object.keys(grouped).sort().forEach(cn => {
+        const items = grouped[cn];
+        const subtotal = items.reduce((a, b) => a + parseFloat(b.debitAmount || 0), 0);
+
+        const div = document.createElement("div");
+        div.style.cssText = "border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden;";
+
+        let rowsHtml = "";
+        items.forEach(c => {
+          const catBadge = (c.category === 'Labor' || c.category === 'Labour') ? 'badge-orange' : 'badge-blue';
+          rowsHtml += `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+              <td style="padding: 8px 12px; font-size: 12px;"><strong>${c.claimNumber || '600064226'}</strong></td>
+              <td style="padding: 8px 12px; font-size: 12px; color: #0284c7;"><strong>${c.id}</strong></td>
+              <td style="padding: 8px 12px; font-size: 12px;"><span class="badge badge-gray">${c.component || 'Product Line'}</span></td>
+              <td style="padding: 8px 12px; font-size: 12px;"><span class="badge ${catBadge}">${c.category || 'Product'}</span></td>
+              <td style="padding: 8px 12px; font-size: 12px; text-align: right; font-weight: 700;">${symbol}${Number(c.debitAmount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            </tr>
+          `;
         });
 
-        // Add chargeback request for this Claim Number / Table
-        const supVal = document.getElementById("popup-supplier-select")?.value || "JIN HENG INTERNATIONAL CO LTD";
-        const newCbNum = `CB-REQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-        copqChargebacksList.unshift({
-          number: newCbNum,
-          name: `CoPQ Chargeback - Claim #${cn}`,
-          claimNumber: cn,
-          date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-          initiator: "admin",
-          coordinator: "John Chen",
-          supplier: supVal === 'ALL' ? "JIN HENG INTERNATIONAL CO LTD" : supVal,
-          supplierCoordinator: "Supplier Admin",
-          currency: currency,
-          costToSupplier: amt,
-          status: "Chargeback Initiated"
-        });
+        div.innerHTML = `
+          <div style="background: #f8fafc; padding: 8px 12px; font-size: 12px; font-weight: 700; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+            <span>Claim Number: ${cn}</span>
+            <span style="color: #0284c7;">Subtotal: ${symbol}${subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+          </div>
+          <table class="data-table" style="margin: 0; width: 100%;">
+            <thead>
+              <tr style="background: #ffffff;">
+                <th style="padding: 6px 12px; font-size: 11px;">Claim Number</th>
+                <th style="padding: 6px 12px; font-size: 11px;">Seq Number</th>
+                <th style="padding: 6px 12px; font-size: 11px;">Component</th>
+                <th style="padding: 6px 12px; font-size: 11px;">Category</th>
+                <th style="padding: 6px 12px; font-size: 11px; text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    function cancelChargebackCreate() {
+      pendingChargebackData = null;
+      switchModule('warranty');
+      showToast("Chargeback creation cancelled", "info");
+    }
+
+    function submitFinalChargebackCreate() {
+      if (!pendingChargebackData) return;
+
+      const finalName = document.getElementById("create-cb-name")?.value || pendingChargebackData.name;
+      const finalDate = document.getElementById("create-cb-date")?.value || pendingChargebackData.initiationDate;
+      const finalSupplierCoord = document.getElementById("create-cb-supplier-coord")?.value || pendingChargebackData.supplierCoordinator;
+
+      if (!finalName.trim()) {
+        showToast("Please enter a Chargeback Name", "info");
+        return;
+      }
+
+      const newCbRecord = {
+        number: pendingChargebackData.cbNumber,
+        name: finalName,
+        date: finalDate,
+        initiator: pendingChargebackData.initiator,
+        coordinator: selectedCoordinators.join(", "),
+        supplier: pendingChargebackData.supplier,
+        supplierCoordinator: finalSupplierCoord,
+        currency: pendingChargebackData.currency,
+        cost: pendingChargebackData.grandTotal,
+        status: "Chargeback Initiated"
+      };
+
+      chargebackRequestsList.unshift(newCbRecord);
+      copqChargebacksList.unshift({
+        number: pendingChargebackData.cbNumber,
+        name: finalName,
+        claimNumber: pendingChargebackData.selectedClaimNumbers.join(", "),
+        date: finalDate,
+        initiator: pendingChargebackData.initiator,
+        coordinator: selectedCoordinators.join(", "),
+        supplier: pendingChargebackData.supplier,
+        supplierCoordinator: finalSupplierCoord,
+        currency: pendingChargebackData.currency,
+        costToSupplier: pendingChargebackData.grandTotal,
+        status: "Chargeback Initiated"
+      });
+
+      pendingChargebackData.claims.forEach(c => {
+        c.actionStatus = "Action Required";
+        c.copqStatus = "CoPQ Assessed";
       });
 
       saveState();
       renderWarrantyTable();
       if (typeof renderCoPQChargebackRequestsTable === 'function') renderCoPQChargebackRequestsTable();
 
-      closeModal('modal-initiate-copq');
-      showToast(`Successfully created CoPQ for ${initiatedClaimNumbers.length} Claim Number(s) totaling ${currencySymbol}${grandTotal.toLocaleString('en-US', {minimumFractionDigits:2})}`, "success");
+      showToast(`Successfully created Chargeback ${pendingChargebackData.cbNumber}!`, "success");
+
+      viewChargebackRequestDetail(pendingChargebackData.cbNumber);
     }
 
     function onSupplierFilterChange() {
