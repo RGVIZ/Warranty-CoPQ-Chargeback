@@ -1115,8 +1115,8 @@
               <button class="segmented-btn" onclick="filterBySegment('Internal', this)">Internal</button>
               <button class="segmented-btn" onclick="filterBySegment('Supplier', this)">Supplier</button>
             </div>
-            <button class="btn-primary" onclick="switchModule('chargeback')">
-              <span>💳</span> Initiate Chargeback
+            <button class="btn-primary" onclick="openInitiateCoPQModal()">
+              <span>💳</span> Initiate CoPQ
             </button>
           </div>
         </div>
@@ -1125,11 +1125,12 @@
         <div class="search-row">
           <select class="search-dropdown" id="search-column-select">
             <option value="all">Select Column to Search...</option>
-            <option value="claimNumber">Claim/Issue Number</option>
+            <option value="claimNumber">Claim Number</option>
+            <option value="id">Claim Seq Number</option>
             <option value="customer">Customer</option>
-            <option value="customerPartNumber">Customer Part Number</option>
+            <option value="component">Component</option>
+            <option value="category">Category</option>
             <option value="supplier">Supplier</option>
-            <option value="dealerName">Dealer Name</option>
             <option value="claimStatus">Claim Status</option>
           </select>
 
@@ -1160,12 +1161,13 @@
                 <tr>
                   <th style="text-align: center;">Actions</th>
                   <th>Claim Status</th>
-                  <th>Claim/Issue Number</th>
+                  <th>Claim Number</th>
+                  <th>Claim Seq Number</th>
+                  <th>Customer</th>
                   <th>Complaint Reported Date</th>
-                  <th>Customer Part Number</th>
-                  <th>Part Detail</th>
+                  <th>Component</th>
+                  <th>Category</th>
                   <th style="text-align: center;">Defect Quantity</th>
-                  <th>Dealer Name</th>
                   <th>Supplier</th>
                   <th>Supplier Code</th>
                   <th>Action Status</th>
@@ -1288,7 +1290,7 @@
       <!-- ==================== VIEW 3: INITIATE CHARGEBACK MODULE ==================== -->
       <div id="view-chargeback" class="module-view" style="display: none;">
 
-        <!-- SUPPLIER & COMPONENT FILTER PANEL & TOP ACTION BAR -->
+        <!-- SUPPLIER & CATEGORY FILTER PANEL & TOP ACTION BAR -->
         <div class="action-header">
           <div class="action-left" style="gap:20px; align-items:center; flex-wrap:wrap;">
             <div>
@@ -1303,25 +1305,12 @@
             </div>
 
             <div>
-              <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Component (Multi-Select):</label>
-              <div class="multiselect-wrapper" id="component-multiselect-wrapper">
-                <div class="multiselect-trigger" id="component-multiselect-trigger" onclick="toggleComponentDropdown(event)">
-                  <span id="component-multiselect-label">-- All Components --</span>
-                </div>
-                <div class="multiselect-menu" id="component-multiselect-menu">
-                  <div class="multiselect-header">
-                    <span>Component Options</span>
-                    <div>
-                      <button type="button" class="multiselect-header-btn" onclick="selectAllComponents(true)">Select All</button>
-                      <span style="margin: 0 4px; color: #cbd5e1;">|</span>
-                      <button type="button" class="multiselect-header-btn" onclick="selectAllComponents(false)">Clear</button>
-                    </div>
-                  </div>
-                  <div id="component-options-container">
-                    <!-- Populated dynamically with unique Component values from table -->
-                  </div>
-                </div>
-              </div>
+              <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Category:</label>
+              <select class="input-select" id="category-filter-select" style="min-width: 180px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onSupplierFilterChange()">
+                <option value="ALL">-- All Categories --</option>
+                <option value="Product">Product</option>
+                <option value="Labor">Labor</option>
+              </select>
             </div>
           </div>
 
@@ -1333,7 +1322,7 @@
           </div>
         </div>
 
-        <!-- INITIATE CHARGEBACK CLAIMS TABLE (REFERENCING IMAGE 2 EXCEL) -->
+        <!-- INITIATE CHARGEBACK CLAIMS TABLE -->
         <div class="table-container">
           <div class="table-scroll">
             <table class="data-table" id="chargeback-table">
@@ -1342,19 +1331,15 @@
                   <th style="width:40px; text-align:center;">
                     <input type="checkbox" id="cb-select-all" onchange="toggleSelectAllChargebacks(this)">
                   </th>
-                  <th>Calendar Date</th>
-                  <th>Claim Num</th>
-                  <th>Claim Seq Num</th>
-                  <th>Claim Reason</th>
+                  <th>Claim Number</th>
+                  <th>Claim Seq Number</th>
                   <th>Component</th>
-                  <th>Mfg Style</th>
-                  <th>Mfg Color Cd</th>
-                  <th>Mfg Size Cd</th>
+                  <th>Category</th>
                   <th style="text-align:right;">Total Claim Amount</th>
                 </tr>
               </thead>
               <tbody id="chargeback-table-body">
-                <!-- JS populated rows matching Image 2 excel -->
+                <!-- JS populated rows matching Warranty listing dataset -->
               </tbody>
             </table>
           </div>
@@ -1603,6 +1588,16 @@
               </select>
             </div>
             <div class="form-group">
+              <label class="form-label">Component</label>
+              <select class="input-select" id="nc-component">
+                <option value="Product Line" selected>Product Line</option>
+                <option value="Labor">Labor</option>
+                <option value="Freight">Freight</option>
+                <option value="Fuel Surcharge">Fuel Surcharge</option>
+                <option value="Misc">Misc</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label class="form-label">VIN Information</label>
               <input type="text" class="input-text" id="nc-vin" placeholder="1FA6P8CF0H5123456">
             </div>
@@ -1637,6 +1632,73 @@
       <div class="modal-footer">
         <button class="btn-icon" onclick="closeModal('modal-view-claim')">Close</button>
         <button class="btn-primary" id="btn-modal-initiate-cb" onclick="modalInitiateCb()">Initiate Chargeback for Claim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INITIATE COPQ POP-UP -->
+  <div class="modal-overlay" id="modal-initiate-copq">
+    <div class="modal-card" style="width: 85vw; max-width: 980px; max-height: 85vh;">
+      <div class="modal-header">
+        <div class="modal-title" style="display:flex; align-items:center; gap:8px;">
+          <span>⚡</span> Initiate CoPQ
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-initiate-copq')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- SUPPLIER & CATEGORY FILTER PANEL -->
+        <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <div>
+            <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Choose Supplier:</label>
+            <select class="input-select" id="popup-supplier-select" style="min-width: 280px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="renderPopUpCoPQTable()">
+              <!-- JS Populated with suppliers from Warranty Listing -->
+            </select>
+          </div>
+
+          <div>
+            <label style="font-weight:700; font-size:13px; display:block; margin-bottom:4px; color:#0f172a;">Category:</label>
+            <select class="input-select" id="popup-category-select" style="min-width: 180px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="renderPopUpCoPQTable()">
+              <option value="ALL">-- All Categories --</option>
+              <option value="Product">Product</option>
+              <option value="Labor">Labor</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RECORDS TABLE (PULLED FROM WARRANTY LISTING PAGE) -->
+        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:40px; text-align:center;">
+                  <input type="checkbox" id="popup-cb-select-all" onchange="toggleSelectAllPopUpClaims(this)">
+                </th>
+                <th>Claim Number</th>
+                <th>Claim Seq Number</th>
+                <th>Component</th>
+                <th>Category</th>
+                <th style="text-align:right;">Total Claim Amount</th>
+              </tr>
+            </thead>
+            <tbody id="popup-copq-table-body">
+              <!-- JS Populated rows matching warrantyClaims -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SUMMARY FOOTER INSIDE MODAL BODY -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f1f5f9; padding:10px 16px; border-radius:6px; font-size:13px;">
+          <div id="popup-records-count" style="font-weight:600; color:#475569;">Showing 0 records</div>
+          <div style="font-weight:700; color:#0284c7;" id="popup-table-sum">Selected Total: $0.00</div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn-icon" onclick="closeModal('modal-initiate-copq')">Cancel</button>
+        <button class="btn-primary" style="padding:9px 18px; font-size:13px; font-weight:600;" onclick="submitPopUpChargeback()">
+          ⚡ Submit Chargeback Request
+        </button>
       </div>
     </div>
   </div>
@@ -1704,298 +1766,209 @@
     const STORAGE_KEY_CLAIMS = "empower_qlm_warranty_claims";
     const STORAGE_KEY_CHARGEBACKS = "empower_qlm_chargeback_items";
 
-    // Dataset from Image 1
-    const INITIAL_WARRANTY_CLAIMS = [
-      {
-        id: "WR-CLM-2026-33107",
-        claimStatus: "Workflow Completed",
-        customer: "Karthik Engineering",
-        reportDate: "19 Jul 2026",
-        customerPartNumber: "CUS-HCY-1036",
-        partDetail: "Hydraulic Cylinder / HCY-320-10C",
-        defectQty: 1,
-        dealerName: "Karthik Engineering Center",
-        supplyPlant: "Hydraulic Systems Plant",
-        supplier: "JIN HENG INTERNATIONAL CO LTD",
-        supplierCode: "SUP-JH-8801",
-        actionStatus: "In Review",
-        debitAmount: 2652.00,
-        vin: "1FA6P8CF0H5123456",
-        model: "X-Line SUV",
-        meetingDate: "22 Jul 2026",
-        coordinator: "John Chen",
-        copqStatus: "CoPQ Assessed",
-        ncStatus: "NC Open",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      },
-      {
-        id: "WR-CLM-2026-33121",
-        claimStatus: "Reviewed",
-        customer: "Nova Industrial Solutions",
-        reportDate: "13 Jul 2026",
-        customerPartNumber: "CUS-ECU-4128",
-        partDetail: "Control Unit / ECU-150-4128-A",
-        defectQty: 1,
-        dealerName: "Nova Service Center",
-        supplyPlant: "Electronics Mfg Plant 1",
-        supplier: "JIN HENG INTERNATIONAL CO LTD",
-        supplierCode: "SUP-JH-8801",
-        actionStatus: "Pending Action",
-        debitAmount: 1387.00,
-        vin: "1G1YC2D70H5654321",
-        model: "Pro-Truck 500",
-        meetingDate: "18 Jul 2026",
-        coordinator: "Michael Wong",
-        copqStatus: "Pending CoPQ",
-        ncStatus: "Under Investigation",
-        ncRequired: "Yes",
-        segment: "Internal"
-      },
-      {
-        id: "WR-CLM-2026-33129",
-        claimStatus: "Reviewed",
-        customer: "Vertex Engineering",
-        reportDate: "12 Jul 2026",
-        customerPartNumber: "CUS-HSG-3315",
-        partDetail: "Housing / HSG-420-3315-A",
-        defectQty: 3,
-        dealerName: "Vertex Service Center",
-        supplyPlant: "Structural Components Plant",
-        supplier: "WON SINH TECHNOLOGY (THAILAND)",
-        supplierCode: "SUP-WS-3042",
-        actionStatus: "Action Required",
-        debitAmount: 3549.00,
-        vin: "5YJSA1E28HF123890",
-        model: "E-Sedan GT",
-        meetingDate: "16 Jul 2026",
-        coordinator: "Sarah Jenkins",
-        copqStatus: "CoPQ Approved",
-        ncStatus: "NC Open",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      },
-      {
-        id: "WR-CLM-2025-10051",
-        claimStatus: "Reviewed",
-        customer: "Customer C",
-        reportDate: "21 Mar 2025",
-        customerPartNumber: "CUS-APX-9901",
-        partDetail: "x123 Structural Sub-assembly",
-        defectQty: 1,
-        dealerName: "Apex Service Center",
-        supplyPlant: "Powertrain Assembly Plant",
-        supplier: "SS FLOOR COMPANY *WT*USD* CHI",
-        supplierCode: "SUP-SS-1102",
-        actionStatus: "In Progress",
-        debitAmount: 1150.00,
-        vin: "2C3CDFGH9KH987123",
-        model: "Heavy Duty Hauler",
-        meetingDate: "25 Mar 2025",
-        coordinator: "David Miller",
-        copqStatus: "CoPQ Assessed",
-        ncStatus: "NC Closed",
-        ncRequired: "No",
-        segment: "Internal"
-      },
-      {
-        id: "WR-CLM-2026-33143",
-        claimStatus: "Reviewed",
-        customer: "Apex Manufacturing",
-        reportDate: "10 Jul 2026",
-        customerPartNumber: "CUS-HPU-1045",
-        partDetail: "Hydraulic Pump / HPU-250-1045",
-        defectQty: 1,
-        dealerName: "Apex Service Center",
-        supplyPlant: "Powertrain Assembly Plant",
-        supplier: "VIETNAM ZHISHANG NEW MATERIALS",
-        supplierCode: "SUP-VZ-9910",
-        actionStatus: "Action Required",
-        debitAmount: 2218.00,
-        vin: "3FA6P08U7HR445120",
-        model: "X-Line SUV",
-        meetingDate: "15 Jul 2026",
-        coordinator: "Alex Turner",
-        copqStatus: "CoPQ Assessed",
-        ncStatus: "NC Open",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      },
-      {
-        id: "WR-CLM-2026-33145",
-        claimStatus: "Reviewed",
-        customer: "Karthik Engineering",
-        reportDate: "19 Jul 2026",
-        customerPartNumber: "CUS-HCY-1036",
-        partDetail: "Hydraulic Cylinder / HCY-320-10C",
-        defectQty: 1,
-        dealerName: "Karthik Engineering Center",
-        supplyPlant: "Hydraulic Systems Plant",
-        supplier: "JIN HENG INTERNATIONAL CO LTD",
-        supplierCode: "SUP-JH-8801",
-        actionStatus: "In Review",
-        debitAmount: 1434.00,
-        vin: "1FA6P8CF0H5123457",
-        model: "X-Line SUV",
-        meetingDate: "22 Jul 2026",
-        coordinator: "John Chen",
-        copqStatus: "CoPQ Assessed",
-        ncStatus: "NC Open",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      },
-      {
-        id: "WR-CLM-2026-33147",
-        claimStatus: "Reviewed",
-        customer: "Swasthik Industries",
-        reportDate: "11 Jul 2026",
-        customerPartNumber: "CUS-GBX-2180",
-        partDetail: "Gearbox / GBX-310-2180-A",
-        defectQty: 2,
-        dealerName: "Swasthik Service Center",
-        supplyPlant: "Driveline Manufacturing",
-        supplier: "JIN HENG INTERNATIONAL CO LTD",
-        supplierCode: "SUP-JH-8801",
-        actionStatus: "Resolved",
-        debitAmount: 1760.00,
-        vin: "4T1B11HK5JU339102",
-        model: "City Cruiser",
-        meetingDate: "14 Jul 2026",
-        coordinator: "Michael Wong",
-        copqStatus: "CoPQ Approved",
-        ncStatus: "NC Closed",
-        ncRequired: "No",
-        segment: "Internal"
-      },
-      {
-        id: "WR-CLM-2026-33127",
-        claimStatus: "Reviewed",
-        customer: "Orion Systems",
-        reportDate: "18 Jul 2026",
-        customerPartNumber: "CUS-PWM-9271",
-        partDetail: "Power Module / PWM-600-9271",
-        defectQty: 3,
-        dealerName: "Orion Service Center",
-        supplyPlant: "Electronics Mfg Plant 1",
-        supplier: "JIN HENG INTERNATIONAL CO LTD",
-        supplierCode: "SUP-JH-8801",
-        actionStatus: "Pending Response",
-        debitAmount: 9610.00,
-        vin: "1G1YC2D70H5659999",
-        model: "Pro-Truck 500",
-        meetingDate: "20 Jul 2026",
-        coordinator: "Sarah Jenkins",
-        copqStatus: "Pending CoPQ",
-        ncStatus: "NC Open",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      },
-      {
-        id: "WR-CLM-2026-33149",
-        claimStatus: "Claim Acknowledged",
-        customer: "Pioneer Components",
-        reportDate: "14 Jul 2026",
-        customerPartNumber: "CUS-MTR-5234",
-        partDetail: "Motor Assembly / MTR-220-5234",
-        defectQty: 2,
-        dealerName: "Pioneer Service Center",
-        supplyPlant: "Powertrain Assembly Plant",
-        supplier: "JIN HENG INTERNATIONAL CO LTD",
-        supplierCode: "SUP-JH-8801",
-        actionStatus: "Acknowledged",
-        debitAmount: 1179.00,
-        vin: "1FA6P8CF0H5123999",
-        model: "E-Sedan GT",
-        meetingDate: "17 Jul 2026",
-        coordinator: "Alex Turner",
-        copqStatus: "CoPQ Assessed",
-        ncStatus: "Under Investigation",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      },
-      {
-        id: "WR-CLM-2026-33150",
-        claimStatus: "Claim Acknowledged",
-        customer: "Titan Manufacturing",
-        reportDate: "15 Jul 2026",
-        customerPartNumber: "CUS-PMP-6142",
-        partDetail: "Pump Assembly / PMP-180-6142",
-        defectQty: 3,
-        dealerName: "Titan Service Center",
-        supplyPlant: "Fluid Systems Plant",
-        supplier: "WON SINH TECHNOLOGY (THAILAND)",
-        supplierCode: "SUP-WS-3042",
-        actionStatus: "Acknowledged",
-        debitAmount: 495.00,
-        vin: "5YJSA1E28HF123777",
-        model: "Heavy Duty Hauler",
-        meetingDate: "19 Jul 2026",
-        coordinator: "David Miller",
-        copqStatus: "CoPQ Assessed",
-        ncStatus: "NC Open",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      },
-      {
-        id: "WR-CLM-2026-33142",
-        claimStatus: "Open",
-        customer: "Fusion Dynamics",
-        reportDate: "17 Jul 2026",
-        customerPartNumber: "CUS-DSA-8163",
-        partDetail: "Drive Shaft / DSA-410-8163-A",
-        defectQty: 2,
-        dealerName: "Fusion Service Center",
-        supplyPlant: "Driveline Manufacturing",
-        supplier: "JIN HENG INTERNATIONAL CO LTD",
-        supplierCode: "SUP-JH-8801",
-        actionStatus: "Open",
-        debitAmount: 3881.00,
-        vin: "3FA6P08U7HR445999",
-        model: "Pro-Truck 500",
-        meetingDate: "21 Jul 2026",
-        coordinator: "John Chen",
-        copqStatus: "Pending CoPQ",
-        ncStatus: "NC Open",
-        ncRequired: "Yes",
-        segment: "Supplier"
-      }
-    ];
+    // Generator function for 500 records with rich variety in Component and Customer mapping
+    function generate500WarrantyClaims() {
+      const customers = [
+        "0010410075 - PARKSIDE HOME BUILDING CENTRE",
+        "0010424267 - ACQUIRE SOURCING, LLC",
+        "0010167691 - ADVANCED INTERIORS INC",
+        "0010186956 - DOBBINS FLOOR COVERING INC",
+        "0010124593 - JEK CARPET CORPORATION",
+        "0010101148 - AMBASSADOR FLOORING CO",
+        "0010415168 - PS OF WEST TEXAS LLC",
+        "0010106148 - VINTAGE DESIGN-IRVINE",
+        "0010109421 - LIFESTYLE CARPETS INC",
+        "0010157136 - CLOSS ENTERPRISES INC ILG",
+        "0010124403 - VANNS ENTERPRISES INC",
+        "0010104755 - REDI CARPET- STAFFORD",
+        "0010136419 - IMPACT FLOORS OF TEXAS LLC",
+        "0010112390 - MOHAWK INDUSTRIES INC",
+        "0010148812 - INTERIOR SPECIALISTS INC",
+        "0010159930 - BUILDERS FIRSTSOURCE INC"
+      ];
 
-    // Dataset from Image 2 (Excel Image) - Chargeback Claims
+      const components = ["Labor", "Freight", "Product Line", "Fuel Surcharge", "Misc"];
+
+      const suppliers = [
+        { name: "JIN HENG INTERNATIONAL CO LTD", code: "SUP-JH-8801" },
+        { name: "WON SINH TECHNOLOGY (THAILAND)", code: "SUP-WS-3042" },
+        { name: "SS FLOOR COMPANY *WT*USD* CHI", code: "SUP-SS-1102" },
+        { name: "VIETNAM ZHISHANG NEW MATERIALS", code: "SUP-VZ-9910" },
+        { name: "SHANGHAI QUALITY MATRIX INC", code: "SUP-SQ-4402" }
+      ];
+
+      const statuses = ["Workflow Completed", "Reviewed", "Claim Acknowledged", "Open", "Closed"];
+      const actionStatuses = ["In Review", "Pending Action", "Action Required", "In Progress", "Resolved", "Pending Response", "Acknowledged", "Open"];
+      const copqStatuses = ["CoPQ Assessed", "Pending CoPQ", "CoPQ Approved", "CoPQ Initiated"];
+      const ncStatuses = ["NC Open", "NC Closed", "Under Investigation"];
+      const models = ["X-Line SUV", "Pro-Truck 500", "E-Sedan GT", "Heavy Duty Hauler", "City Cruiser"];
+      const coordinators = ["John Chen", "Michael Wong", "Sarah Jenkins", "David Miller", "Alex Turner", "Emily Davis"];
+
+      const baseClaimNums = [
+        "600064226", "600079684", "600081783", "600082369", "600084827", "600086483", 
+        "600088747", "600088751", "600088752", "600089982", "600090194", "600094066", 
+        "600094097", "600094105", "600094127", "600094267", "600094288", "600094293", 
+        "600094301", "600094302", "600094325", "600094332", "600094344", "600094550", 
+        "600094834", "600094849"
+      ];
+
+      const dates = [
+        "09 Jun 2026", "11 Jun 2026", "14 Jun 2026", "18 Jun 2026", "22 Jun 2026",
+        "28 Jun 2026", "02 Jul 2026", "08 Jul 2026", "14 Jul 2026", "19 Jul 2026",
+        "25 Jul 2026", "01 Aug 2026", "08 Aug 2026"
+      ];
+
+      const seedItems = [
+        { claimNum: "600064226", seqNum: "010000551013", component: "Labor", customer: "0010410075 - PARKSIDE HOME BUILDING CENTRE", amount: 2652.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600079684", seqNum: "010000477223", component: "Labor", customer: "0010424267 - ACQUIRE SOURCING, LLC", amount: 1387.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600081783", seqNum: "010000462589", component: "Freight", customer: "0010167691 - ADVANCED INTERIORS INC", amount: 97.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600081783", seqNum: "010000462596", component: "Product Line", customer: "0010167691 - ADVANCED INTERIORS INC", amount: 1434.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600081783", seqNum: "010000462615", component: "Fuel Surcharge", customer: "0010167691 - ADVANCED INTERIORS INC", amount: 14.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600082369", seqNum: "010000466026", component: "Product Line", customer: "0010186956 - DOBBINS FLOOR COVERING INC", amount: 2237.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600082369", seqNum: "010000480861", component: "Labor", customer: "0010186956 - DOBBINS FLOOR COVERING INC", amount: 1760.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600082369", seqNum: "010000557435", component: "Freight", customer: "0010186956 - DOBBINS FLOOR COVERING INC", amount: 150.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600084827", seqNum: "010000537649", component: "Labor", customer: "0010124593 - JEK CARPET CORPORATION", amount: 1150.00, supplier: "SS FLOOR COMPANY *WT*USD* CHI", supplierCode: "SUP-SS-1102" },
+        { claimNum: "600086483", seqNum: "010000488006", component: "Product Line", customer: "0010101148 - AMBASSADOR FLOORING CO", amount: 3549.00, supplier: "WON SINH TECHNOLOGY (THAILAND)", supplierCode: "SUP-WS-3042" },
+        { claimNum: "600088747", seqNum: "010000500925", component: "Product Line", customer: "0010415168 - PS OF WEST TEXAS LLC", amount: 480.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600088751", seqNum: "010000500885", component: "Product Line", customer: "0010415168 - PS OF WEST TEXAS LLC", amount: 560.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600088752", seqNum: "010000500849", component: "Product Line", customer: "0010415168 - PS OF WEST TEXAS LLC", amount: 480.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600089982", seqNum: "010000509416", component: "Product Line", customer: "0010106148 - VINTAGE DESIGN-IRVINE", amount: 495.00, supplier: "WON SINH TECHNOLOGY (THAILAND)", supplierCode: "SUP-WS-3042" },
+        { claimNum: "600090194", seqNum: "010000510558", component: "Product Line", customer: "0010109421 - LIFESTYLE CARPETS INC", amount: 9610.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094066", seqNum: "010000541723", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1179.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094097", seqNum: "010000541768", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1914.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094105", seqNum: "010000541911", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 2552.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094127", seqNum: "010000541948", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1183.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094267", seqNum: "010000544736", component: "Product Line", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 600.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094267", seqNum: "010000544748", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1134.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094267", seqNum: "010000544810", component: "Freight", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 139.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094288", seqNum: "010000544867", component: "Product Line", customer: "0010124403 - VANNS ENTERPRISES INC", amount: 3881.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094293", seqNum: "010000544910", component: "Product Line", customer: "0010124403 - VANNS ENTERPRISES INC", amount: 2015.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094301", seqNum: "010000544953", component: "Product Line", customer: "0010124403 - VANNS ENTERPRISES INC", amount: 2218.00, supplier: "VIETNAM ZHISHANG NEW MATERIALS", supplierCode: "SUP-VZ-9910" },
+        { claimNum: "600094302", seqNum: "010000544896", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1270.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094302", seqNum: "010000544906", component: "Product Line", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 640.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094302", seqNum: "010000544914", component: "Freight", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 139.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094325", seqNum: "010000544969", component: "Product Line", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 840.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094325", seqNum: "010000544988", component: "Freight", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 60.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094332", seqNum: "010000545018", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1212.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094332", seqNum: "010000545035", component: "Product Line", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 640.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094332", seqNum: "010000545045", component: "Freight", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 46.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094344", seqNum: "010000545076", component: "Labor", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1279.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094344", seqNum: "010000545123", component: "Product Line", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 680.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094344", seqNum: "010000545150", component: "Freight", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 150.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094550", seqNum: "010000546684", component: "Product Line", customer: "0010104755 - REDI CARPET- STAFFORD", amount: 480.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094834", seqNum: "010000548773", component: "Freight", customer: "0010136419 - IMPACT FLOORS OF TEXAS LLC", amount: 210.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094834", seqNum: "010000548789", component: "Product Line", customer: "0010136419 - IMPACT FLOORS OF TEXAS LLC", amount: 1840.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094834", seqNum: "010000548814", component: "Fuel Surcharge", customer: "0010136419 - IMPACT FLOORS OF TEXAS LLC", amount: 25.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" },
+        { claimNum: "600094849", seqNum: "010000548827", component: "Product Line", customer: "0010157136 - CLOSS ENTERPRISES INC ILG", amount: 1560.00, supplier: "JIN HENG INTERNATIONAL CO LTD", supplierCode: "SUP-JH-8801" }
+      ];
+
+      const records = [];
+
+      for (let i = 0; i < 500; i++) {
+        let claimNum, seqNum, component, customer, debitAmount, supplierObj;
+
+        if (i < seedItems.length) {
+          const s = seedItems[i];
+          claimNum = s.claimNum;
+          seqNum = s.seqNum;
+          component = s.component;
+          customer = s.customer;
+          debitAmount = s.amount;
+          supplierObj = { name: s.supplier, code: s.supplierCode };
+        } else {
+          claimNum = baseClaimNums[i % baseClaimNums.length];
+          const seqNumBase = 1000046000 + (i * 317) % 100000;
+          seqNum = `010000${String(seqNumBase).slice(-6)}`;
+          component = components[i % components.length];
+          customer = customers[i % customers.length];
+          debitAmount = Math.round((14 + ((i * 137) % 3500) + ((i % 5) * 850)) * 100) / 100;
+          supplierObj = suppliers[i % suppliers.length];
+        }
+
+        let category = "Product";
+        if (component === "Labor" || component === "Labour") category = "Labor";
+        else if (component === "Freight") category = "Product";
+        else if (component === "Fuel Surcharge" || component === "Misc") category = "Product";
+
+        const reportDate = dates[i % dates.length];
+        const claimStatus = statuses[i % statuses.length];
+        const actionStatus = actionStatuses[i % actionStatuses.length];
+        const copqStatus = copqStatuses[i % copqStatuses.length];
+        const ncStatus = ncStatuses[i % ncStatuses.length];
+        const model = models[i % models.length];
+        const coordinator = coordinators[i % coordinators.length];
+        const defectQty = 1 + (i % 4);
+
+        records.push({
+          id: seqNum,
+          claimNumber: claimNum,
+          claimStatus: claimStatus,
+          customer: customer,
+          reportDate: reportDate,
+          component: component,
+          category: category,
+          defectQty: defectQty,
+          supplier: supplierObj.name,
+          supplierCode: supplierObj.code,
+          actionStatus: actionStatus,
+          debitAmount: debitAmount,
+          vin: `1FA6P8CF0H${500000 + i}`,
+          model: model,
+          meetingDate: dates[(i + 3) % dates.length],
+          coordinator: coordinator,
+          copqStatus: copqStatus,
+          ncStatus: ncStatus,
+          ncRequired: (i % 5 === 0) ? "No" : "Yes",
+          segment: (i % 4 === 0) ? "Internal" : "Supplier",
+          customerPartNumber: `010000${500000 + i}`,
+          partDetail: `Part Assembly Component #${i + 1}`,
+          dealerName: `${customer.split('-')[1]?.trim() || customer} Service Center`,
+          supplyPlant: "Main Assembly Plant"
+        });
+      }
+
+      return records;
+    }
+
+    const INITIAL_WARRANTY_CLAIMS = generate500WarrantyClaims();
+
+    // Dataset from Image 2 (Excel Image) - Chargeback Claims / Initiate CoPQ
     const INITIAL_CHARGEBACK_DATA = [
-      { date: "09-06-2026", claimNum: "600064226", seqNum: "010000551013", reason: "2153 - Shrinkage", component: "Labour", style: "67837-BALLARD 2.0", colorCd: "190", sizeCd: "0648", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2652 },
-      { date: "09-06-2026", claimNum: "600079684", seqNum: "010000477223", reason: "2170 - Other Physical Defects", component: "Labour", style: "67916-PRO SOLUTION 23", colorCd: "232", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1387 },
-      { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462589", reason: "2169 - Milling / Locking System", component: "Product Line", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 97 },
+      { date: "09-06-2026", claimNum: "600064226", seqNum: "010000551013", reason: "2153 - Shrinkage", component: "Labor", style: "67837-BALLARD 2.0", colorCd: "190", sizeCd: "0648", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2652 },
+      { date: "09-06-2026", claimNum: "600079684", seqNum: "010000477223", reason: "2170 - Other Physical Defects", component: "Labor", style: "67916-PRO SOLUTION 23", colorCd: "232", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1387 },
+      { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462589", reason: "2169 - Milling / Locking System", component: "Freight", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 97 },
       { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462596", reason: "2169 - Milling / Locking System", component: "Product Line", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1434 },
-      { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462615", reason: "2169 - Milling / Locking System", component: "Product Line", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 14 },
+      { date: "09-06-2026", claimNum: "600081783", seqNum: "010000462615", reason: "2169 - Milling / Locking System", component: "Fuel Surcharge", style: "67820-DIRECT IMPORT 3.5+1", colorCd: "908", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 14 },
       { date: "09-06-2026", claimNum: "600082369", seqNum: "010000466026", reason: "2164 - Cupping", component: "Product Line", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2237 },
-      { date: "09-06-2026", claimNum: "600082369", seqNum: "010000480861", reason: "2164 - Cupping", component: "Labour", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1760 },
-      { date: "09-06-2026", claimNum: "600082369", seqNum: "010000557435", reason: "2164 - Cupping", component: "Product Line", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 150 },
-      { date: "09-06-2026", claimNum: "600084827", seqNum: "010000537649", reason: "2164 - Cupping", component: "Labour", style: "67755-TILE OPTIONS", colorCd: "976", sizeCd: "1836", supplier: "SS FLOOR COMPANY *WT*USD* CHI", amount: 1150 },
+      { date: "09-06-2026", claimNum: "600082369", seqNum: "010000480861", reason: "2164 - Cupping", component: "Labor", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1760 },
+      { date: "09-06-2026", claimNum: "600082369", seqNum: "010000557435", reason: "2164 - Cupping", component: "Freight", style: "67916-PRO SOLUTION 23", colorCd: "711", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 150 },
+      { date: "09-06-2026", claimNum: "600084827", seqNum: "010000537649", reason: "2164 - Cupping", component: "Labor", style: "67755-TILE OPTIONS", colorCd: "976", sizeCd: "1836", supplier: "SS FLOOR COMPANY *WT*USD* CHI", amount: 1150 },
       { date: "09-06-2026", claimNum: "600086483", seqNum: "010000488006", reason: "2155 - Wear Layer", component: "Product Line", style: "67938-EMERALD WATER IMPORT", colorCd: "822", sizeCd: "07B47", supplier: "WON SINH TECHNOLOGY (THAILAND)", amount: 3549 },
       { date: "09-06-2026", claimNum: "600088747", seqNum: "010000500925", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "004", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 480 },
       { date: "09-06-2026", claimNum: "600088751", seqNum: "010000500885", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "004", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 560 },
       { date: "09-06-2026", claimNum: "600088752", seqNum: "010000500849", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "004", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 480 },
       { date: "09-06-2026", claimNum: "600089982", seqNum: "010000509416", reason: "2164 - Cupping", component: "Product Line", style: "67935-BOXWOOD GABLES", colorCd: "838", sizeCd: "07A48E", supplier: "WON SINH TECHNOLOGY (THAILAND)", amount: 495 },
       { date: "09-06-2026", claimNum: "600090194", seqNum: "010000510558", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67824-PRO SOL GD 2/6", colorCd: "983", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 9610 },
-      { date: "09-06-2026", claimNum: "600094066", seqNum: "010000541723", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1179 },
-      { date: "09-06-2026", claimNum: "600094097", seqNum: "010000541768", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1914 },
-      { date: "09-06-2026", claimNum: "600094105", seqNum: "010000541911", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2552 },
-      { date: "09-06-2026", claimNum: "600094127", seqNum: "010000541948", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1183 },
+      { date: "09-06-2026", claimNum: "600094066", seqNum: "010000541723", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1179 },
+      { date: "09-06-2026", claimNum: "600094097", seqNum: "010000541768", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1914 },
+      { date: "09-06-2026", claimNum: "600094105", seqNum: "010000541911", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2552 },
+      { date: "09-06-2026", claimNum: "600094127", seqNum: "010000541948", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1183 },
       { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544736", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 600 },
-      { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544748", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1134 },
-      { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544810", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 139 },
+      { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544748", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1134 },
+      { date: "09-06-2026", claimNum: "600094267", seqNum: "010000544810", reason: "2170 - Other Physical Defects", component: "Freight", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 139 },
       { date: "09-06-2026", claimNum: "600094288", seqNum: "010000544867", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67837-BALLARD 2.0", colorCd: "330", sizeCd: "0648", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 3881 },
       { date: "09-06-2026", claimNum: "600094293", seqNum: "010000544910", reason: "2130 - Performance Warranty", component: "Product Line", style: "67916-PRO SOLUTION 23", colorCd: "838", sizeCd: "0648V", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 2015 },
       { date: "09-06-2026", claimNum: "600094301", seqNum: "010000544953", reason: "2130 - Performance Warranty", component: "Product Line", style: "67824-PRO SOL GD 2/6", colorCd: "124", sizeCd: "0648V", supplier: "VIETNAM ZHISHANG NEW MATERIALS", amount: 2218 },
-      { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544896", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1270 },
+      { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544896", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1270 },
       { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544906", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 640 },
-      { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544914", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 139 },
+      { date: "09-06-2026", claimNum: "600094302", seqNum: "010000544914", reason: "2170 - Other Physical Defects", component: "Freight", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 139 },
       { date: "09-06-2026", claimNum: "600094325", seqNum: "010000544969", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 840 },
-      { date: "09-06-2026", claimNum: "600094325", seqNum: "010000544988", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 60 },
-      { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545018", reason: "2170 - Other Physical Defects", component: "Labour", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1212 },
+      { date: "09-06-2026", claimNum: "600094325", seqNum: "010000544988", reason: "2170 - Other Physical Defects", component: "Freight", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 60 },
+      { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545018", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1212 },
       { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545035", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 640 },
-      { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545045", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 46 }
+      { date: "09-06-2026", claimNum: "600094332", seqNum: "010000545045", reason: "2170 - Other Physical Defects", component: "Freight", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 46 },
+      { date: "09-06-2026", claimNum: "600094344", seqNum: "010000545076", reason: "2170 - Other Physical Defects", component: "Labor", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 1279 },
+      { date: "09-06-2026", claimNum: "600094344", seqNum: "010000545123", reason: "2170 - Other Physical Defects", component: "Product Line", style: "67840-WESTWARD 2.0", colorCd: "810", sizeCd: "0748", supplier: "JIN HENG INTERNATIONAL CO LTD", amount: 680 }
     ];
 
     // Dataset from Image 2 - CoPQ Elements
@@ -2057,9 +2030,19 @@
     function loadState() {
       const savedClaims = localStorage.getItem(STORAGE_KEY_CLAIMS);
       if (savedClaims) {
-        try { warrantyClaims = JSON.parse(savedClaims); } catch(e) { warrantyClaims = [...INITIAL_WARRANTY_CLAIMS]; }
+        try {
+          warrantyClaims = JSON.parse(savedClaims);
+          if (!Array.isArray(warrantyClaims) || warrantyClaims.length < 500 || !warrantyClaims[0].claimNumber || !warrantyClaims[0].customer) {
+            warrantyClaims = [...INITIAL_WARRANTY_CLAIMS];
+            saveState();
+          }
+        } catch(e) {
+          warrantyClaims = [...INITIAL_WARRANTY_CLAIMS];
+          saveState();
+        }
       } else {
         warrantyClaims = [...INITIAL_WARRANTY_CLAIMS];
+        saveState();
       }
 
       const savedCb = localStorage.getItem(STORAGE_KEY_CHARGEBACKS);
@@ -2124,7 +2107,7 @@
         'copq-elements': 'CoPQ Elements',
         copq: 'CoPQ Elements',
         'copq-chargebacks': 'Chargeback Requests',
-        chargeback: 'Initiate Chargeback',
+        chargeback: 'Initiate CoPQ',
         'chargeback-detail': 'View Supplier Chargeback'
       };
       document.getElementById("breadcrumb-current").innerText = titles[moduleName] || 'Claims';
@@ -2178,7 +2161,7 @@
 
       // Update Header Stats
       const statClaimsEl = document.getElementById("stat-total-claims");
-      if (statClaimsEl) statClaimsEl.innerText = (24580 + filtered.length - 11).toLocaleString();
+      if (statClaimsEl) statClaimsEl.innerText = filtered.length.toLocaleString();
       let totalAmount = filtered.reduce((acc, curr) => acc + (curr.debitAmount || 0), 0);
       const statValEl = document.getElementById("stat-total-value");
       if (statValEl) statValEl.innerText = "$" + totalAmount.toLocaleString('en-US', {minimumFractionDigits:2});
@@ -2199,6 +2182,12 @@
           copqStatusDisplay = `<span style="color:#64748b;">-</span>`;
         }
 
+        const compVal = claim.component || "Product Line";
+        const catVal = claim.category || (compVal === "Labor" || compVal === "Labour" ? "Labor" : "Product");
+
+        let categoryBadgeClass = "badge-blue";
+        if (catVal === 'Labor' || catVal === 'Labour') categoryBadgeClass = 'badge-orange';
+
         tr.innerHTML = `
           <td style="white-space:nowrap; text-align:center;">
             <div style="display:flex; gap:6px; align-items:center; justify-content:center;">
@@ -2207,12 +2196,13 @@
             </div>
           </td>
           <td><span class="badge ${statusBadgeClass}">${claim.claimStatus}</span></td>
+          <td><strong style="color:#1e293b;">${claim.claimNumber || '600064226'}</strong></td>
           <td><strong style="color:#0284c7; cursor:pointer;" onclick="viewClaimDetails('${claim.id}')">${claim.id}</strong></td>
+          <td style="font-weight:600; color:#1e293b; white-space:nowrap;">${claim.customer}</td>
           <td>${claim.reportDate}</td>
-          <td><code>${claim.customerPartNumber}</code></td>
-          <td>${claim.partDetail}</td>
+          <td><span class="badge badge-gray">${compVal}</span></td>
+          <td><span class="badge ${categoryBadgeClass}">${catVal}</span></td>
           <td style="text-align:center;">${claim.defectQty}</td>
-          <td>${claim.dealerName}</td>
           <td><strong>${claim.supplier}</strong></td>
           <td><code>${claim.supplierCode}</code></td>
           <td><span class="badge badge-gray">${claim.actionStatus}</span></td>
@@ -2227,7 +2217,7 @@
       });
 
       const pagInfo = document.getElementById("pagination-info");
-      if (pagInfo) pagInfo.innerText = `Showing 1 to ${filtered.length} of ${24580 + filtered.length - 11} records`;
+      if (pagInfo) pagInfo.innerText = `Showing 1 to ${filtered.length} of ${filtered.length} records`;
     }
 
     function filterBySegment(segment, btn) {
@@ -2413,8 +2403,164 @@
       }
     });
 
+    /* ==================== INITIATE COPQ POP-UP MODAL & VIEW 3 LOGIC ==================== */
+    function openInitiateCoPQModal() {
+      populatePopUpSuppliers();
+      renderPopUpCoPQTable();
+      openModal('modal-initiate-copq');
+    }
+
+    function populatePopUpSuppliers() {
+      const popupSupSelect = document.getElementById("popup-supplier-select");
+      if (!popupSupSelect) return;
+      
+      const currentVal = popupSupSelect.value || "ALL";
+      popupSupSelect.innerHTML = "";
+      
+      const suppliers = Array.from(new Set(warrantyClaims.map(c => c.supplier))).filter(Boolean).sort();
+      
+      const allOpt = document.createElement("option");
+      allOpt.value = "ALL";
+      allOpt.innerText = "-- Show All Suppliers --";
+      popupSupSelect.appendChild(allOpt);
+      
+      suppliers.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.innerText = s;
+        if (s === currentVal) opt.selected = true;
+        popupSupSelect.appendChild(opt);
+      });
+
+      // Also sync View 3 supplier filter dropdown options
+      const view3SupSelect = document.getElementById("supplier-filter-select");
+      if (view3SupSelect) {
+        const view3Val = view3SupSelect.value || "ALL";
+        view3SupSelect.innerHTML = "";
+        const v3AllOpt = document.createElement("option");
+        v3AllOpt.value = "ALL";
+        v3AllOpt.innerText = "-- Show All Suppliers --";
+        view3SupSelect.appendChild(v3AllOpt);
+        suppliers.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.innerText = s;
+          if (s === view3Val) opt.selected = true;
+          view3SupSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function renderPopUpCoPQTable() {
+      const supVal = document.getElementById("popup-supplier-select")?.value || "ALL";
+      const catVal = document.getElementById("popup-category-select")?.value || "ALL";
+      
+      const tbody = document.getElementById("popup-copq-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const masterChk = document.getElementById("popup-cb-select-all");
+      if (masterChk) masterChk.checked = false;
+
+      let filtered = warrantyClaims.filter(claim => {
+        if (supVal !== "ALL" && claim.supplier !== supVal) return false;
+        if (catVal !== "ALL" && claim.category !== catVal) return false;
+        return true;
+      });
+
+      filtered.forEach(claim => {
+        const tr = document.createElement("tr");
+        const catBadgeClass = (claim.category === 'Labor' || claim.category === 'Labour') ? 'badge-orange' : 'badge-blue';
+        tr.innerHTML = `
+          <td style="text-align:center;">
+            <input type="checkbox" class="popup-claim-check" data-id="${claim.id}" data-amount="${claim.debitAmount || 0}" onchange="updatePopUpSummary()">
+          </td>
+          <td><strong style="color:#1e293b;">${claim.claimNumber || '600064226'}</strong></td>
+          <td><strong style="color:#0284c7;">${claim.id}</strong></td>
+          <td><span class="badge badge-gray">${claim.component || 'Product Line'}</span></td>
+          <td><span class="badge ${catBadgeClass}">${claim.category || 'Product'}</span></td>
+          <td style="font-weight:700; color:#0f172a; text-align:right;">$${Number(claim.debitAmount || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const cntEl = document.getElementById("popup-records-count");
+      if (cntEl) cntEl.innerText = `Showing ${filtered.length} records`;
+
+      updatePopUpSummary();
+    }
+
+    function toggleSelectAllPopUpClaims(masterChk) {
+      const checkboxes = document.querySelectorAll(".popup-claim-check");
+      checkboxes.forEach(chk => {
+        chk.checked = masterChk.checked;
+      });
+      updatePopUpSummary();
+    }
+
+    function updatePopUpSummary() {
+      const checkboxes = document.querySelectorAll(".popup-claim-check");
+      let checkedCount = 0;
+      let totalAmount = 0;
+
+      checkboxes.forEach(chk => {
+        if (chk.checked) {
+          checkedCount++;
+          totalAmount += parseFloat(chk.getAttribute("data-amount") || 0);
+        }
+      });
+
+      const sumEl = document.getElementById("popup-table-sum");
+      if (sumEl) sumEl.innerText = `Selected Total (${checkedCount}): $${totalAmount.toLocaleString('en-US', {minimumFractionDigits:2})}`;
+    }
+
+    function submitPopUpChargeback() {
+      const checkboxes = document.querySelectorAll(".popup-claim-check:checked");
+      if (checkboxes.length === 0) {
+        showToast("Please select at least one record using the checkbox to submit chargeback request", "info");
+        return;
+      }
+
+      let totalAmt = 0;
+      const selectedIds = [];
+      checkboxes.forEach(chk => {
+        selectedIds.push(chk.getAttribute("data-id"));
+        totalAmt += parseFloat(chk.getAttribute("data-amount") || 0);
+      });
+
+      warrantyClaims.forEach(claim => {
+        if (selectedIds.includes(claim.id)) {
+          claim.actionStatus = "Action Required";
+          claim.copqStatus = "CoPQ Assessed";
+        }
+      });
+
+      const supVal = document.getElementById("popup-supplier-select")?.value || "JIN HENG INTERNATIONAL CO LTD";
+      const newCbNum = `CB-REQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      copqChargebacksList.unshift({
+        number: newCbNum,
+        name: `CoPQ Chargeback - ${supVal === 'ALL' ? 'Multi Supplier' : supVal}`,
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        initiator: "admin",
+        coordinator: "John Chen",
+        supplier: supVal === 'ALL' ? "JIN HENG INTERNATIONAL CO LTD" : supVal,
+        supplierCoordinator: "Supplier Admin",
+        currency: "USD",
+        costToSupplier: totalAmt,
+        status: "Chargeback Initiated"
+      });
+
+      saveState();
+      renderWarrantyTable();
+      if (typeof renderCoPQChargebackRequestsTable === 'function') renderCoPQChargebackRequestsTable();
+
+      closeModal('modal-initiate-copq');
+      showToast(`Successfully submitted Chargeback Request (${newCbNum}) for $${totalAmt.toLocaleString('en-US', {minimumFractionDigits:2})}`, "success");
+    }
+
     function onSupplierFilterChange() {
       const supplierSelect = document.getElementById("supplier-filter-select") ? document.getElementById("supplier-filter-select").value : "ALL";
+      const categorySelect = document.getElementById("category-filter-select") ? document.getElementById("category-filter-select").value : "ALL";
       
       const tbody = document.getElementById("chargeback-table-body");
       if (!tbody) return;
@@ -2425,40 +2571,34 @@
 
       tbody.innerHTML = "";
 
-      const uniqueComps = getUniqueComponents();
-
-      let filteredItems = chargebackItems.filter(item => {
+      let filteredItems = warrantyClaims.filter(item => {
         if (supplierSelect !== "ALL" && item.supplier !== supplierSelect) return false;
-        if (selectedComponents.length > 0 && selectedComponents.length < uniqueComps.length && !selectedComponents.includes(item.component)) return false;
+        if (categorySelect !== "ALL" && item.category !== categorySelect) return false;
         return true;
       });
 
       let supplierSum = 0;
 
       filteredItems.forEach((item, index) => {
-        supplierSum += item.amount;
-        const globalIdx = chargebackItems.indexOf(item);
+        supplierSum += (item.debitAmount || 0);
+        const catBadgeClass = (item.category === 'Labor' || item.category === 'Labour') ? 'badge-orange' : 'badge-blue';
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td style="text-align:center;">
-            <input type="checkbox" class="cb-row-check" data-index="${globalIdx}" onchange="onChargebackRowCheckChange(this)">
+            <input type="checkbox" class="cb-row-check" data-id="${item.id}" data-amount="${item.debitAmount || 0}" onchange="onChargebackRowCheckChange(this)">
           </td>
-          <td>${item.date}</td>
-          <td><strong style="color:#0284c7;">${item.claimNum}</strong></td>
-          <td><code>${item.seqNum}</code></td>
-          <td>${item.reason}</td>
-          <td><span class="badge badge-gray">${item.component}</span></td>
-          <td>${item.style}</td>
-          <td>${item.colorCd}</td>
-          <td>${item.sizeCd}</td>
-          <td style="font-weight:bold; color:#0f172a; text-align:right;">$${item.amount.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
+          <td><strong style="color:#1e293b;">${item.claimNumber || '600064226'}</strong></td>
+          <td><strong style="color:#0284c7;">${item.id}</strong></td>
+          <td><span class="badge badge-gray">${item.component || 'Product Line'}</span></td>
+          <td><span class="badge ${catBadgeClass}">${item.category || 'Product'}</span></td>
+          <td style="font-weight:bold; color:#0f172a; text-align:right;">$${Number(item.debitAmount || 0).toLocaleString('en-US', {minimumFractionDigits:2})}</td>
         `;
         tbody.appendChild(tr);
       });
 
       const cntEl = document.getElementById("cb-records-count");
-      if (cntEl) cntEl.innerText = `Showing ${filteredItems.length} claim item records`;
+      if (cntEl) cntEl.innerText = `Showing ${filteredItems.length} records`;
       
       const sumEl = document.getElementById("cb-table-sum");
       if (sumEl) sumEl.innerText = `Total: $${supplierSum.toLocaleString('en-US', {minimumFractionDigits:2})}`;
@@ -2467,12 +2607,6 @@
     }
 
     function onChargebackRowCheckChange(chk) {
-      const idx = parseInt(chk.getAttribute("data-index"));
-      if (chk.checked) {
-        selectedChargebackIndexes.add(idx);
-      } else {
-        selectedChargebackIndexes.delete(idx);
-      }
       updateChargebackSummaryBar();
     }
 
@@ -2480,25 +2614,22 @@
       const checkboxes = document.querySelectorAll(".cb-row-check");
       checkboxes.forEach(chk => {
         chk.checked = masterChk.checked;
-        const idx = parseInt(chk.getAttribute("data-index"));
-        if (masterChk.checked) {
-          selectedChargebackIndexes.add(idx);
-        } else {
-          selectedChargebackIndexes.delete(idx);
-        }
       });
       updateChargebackSummaryBar();
     }
 
     function updateChargebackSummaryBar() {
-      const selectedCountEl = document.getElementById("cb-selected-count");
-      if (selectedCountEl) selectedCountEl.innerText = selectedChargebackIndexes.size;
+      const checkboxes = document.querySelectorAll(".cb-row-check");
+      let count = 0;
       let sum = 0;
-      selectedChargebackIndexes.forEach(idx => {
-        if (chargebackItems[idx]) {
-          sum += chargebackItems[idx].amount;
+      checkboxes.forEach(chk => {
+        if (chk.checked) {
+          count++;
+          sum += parseFloat(chk.getAttribute("data-amount") || 0);
         }
       });
+      const selectedCountEl = document.getElementById("cb-selected-count");
+      if (selectedCountEl) selectedCountEl.innerText = count;
       const selectedAmtEl = document.getElementById("cb-selected-amount");
       if (selectedAmtEl) selectedAmtEl.innerText = "$" + sum.toLocaleString('en-US', {minimumFractionDigits:2});
     }
@@ -2737,12 +2868,18 @@
     }
 
     /* ==================== MODALS & FORM LOGIC ==================== */
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add("active");
+    }
+
     function openNewClaimModal() {
-      document.getElementById("modal-new-claim").classList.add("active");
+      openModal("modal-new-claim");
     }
 
     function closeModal(id) {
-      document.getElementById(id).classList.remove("active");
+      const el = document.getElementById(id);
+      if (el) el.classList.remove("active");
     }
 
     function saveNewClaim() {
@@ -2756,6 +2893,9 @@
         return;
       }
 
+      const compVal = document.getElementById("nc-component") ? document.getElementById("nc-component").value : "Product Line";
+      const catVal = (compVal === "Labor" || compVal === "Labour") ? "Labor" : "Product";
+
       const newClaim = {
         id: id,
         claimStatus: "Open",
@@ -2763,6 +2903,8 @@
         reportDate: "30 Jul 2026",
         customerPartNumber: partNum,
         partDetail: document.getElementById("nc-part-detail").value || "Warranty Component Assembly",
+        component: compVal,
+        category: catVal,
         defectQty: parseInt(document.getElementById("nc-qty").value) || 1,
         dealerName: document.getElementById("nc-dealer").value || "National Service Center",
         supplyPlant: document.getElementById("nc-plant").value || "Main Assembly Plant",
@@ -2783,7 +2925,7 @@
       warrantyClaims.unshift(newClaim);
       saveState();
       renderWarrantyTable();
-      renderCoPQTable();
+      if (typeof renderCoPQTable === "function") renderCoPQTable();
       closeModal("modal-new-claim");
       showToast(`New Claim ${id} successfully registered!`, "success");
     }
@@ -2792,6 +2934,9 @@
       const claim = warrantyClaims.find(c => c.id === claimId);
       if (!claim) return;
       activeClaimForModal = claim;
+
+      const compVal = claim.component || "Product Line";
+      const catVal = claim.category || ((compVal === "Labor" || compVal === "Labour") ? "Labor" : "Product");
 
       document.getElementById("view-claim-title").innerText = `Claim Details: ${claim.id}`;
       const body = document.getElementById("view-claim-body");
@@ -2805,15 +2950,15 @@
         </div>
 
         <div class="form-grid" style="margin-top:12px;">
+          <div><strong>Claim Seq Number:</strong> ${claim.id}</div>
+          <div><strong>Claim Number:</strong> ${claim.claimNumber || '600064226'}</div>
           <div><strong>Customer:</strong> ${claim.customer}</div>
           <div><strong>Reported Date:</strong> ${claim.reportDate}</div>
-          <div><strong>Part Number:</strong> ${claim.customerPartNumber}</div>
+          <div><strong>Component:</strong> <span class="badge badge-gray">${compVal}</span></div>
+          <div><strong>Category:</strong> <span class="badge ${catVal === 'Labor' || catVal === 'Labour' ? 'badge-orange' : 'badge-blue'}">${catVal}</span></div>
           <div><strong>Defect Qty:</strong> ${claim.defectQty}</div>
-          <div class="form-group full-width"><strong>Part Detail:</strong> ${claim.partDetail}</div>
           <div><strong>Supplier:</strong> ${claim.supplier}</div>
           <div><strong>Supplier Code:</strong> ${claim.supplierCode}</div>
-          <div><strong>Dealer:</strong> ${claim.dealerName}</div>
-          <div><strong>Plant:</strong> ${claim.supplyPlant}</div>
           <div><strong>VIN:</strong> ${claim.vin}</div>
           <div><strong>Vehicle Model:</strong> ${claim.model}</div>
           <div><strong>Meeting Date:</strong> ${claim.meetingDate}</div>
