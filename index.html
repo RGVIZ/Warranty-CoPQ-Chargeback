@@ -1049,11 +1049,6 @@
         </a>
         <ul class="sub-menu open" id="copq-submenu">
           <li>
-            <a class="nav-link" id="sublink-copq-elements" onclick="switchModule('copq-elements')">
-              <span class="nav-text">Elements</span>
-            </a>
-          </li>
-          <li>
             <a class="nav-link" id="sublink-copq-chargebacks" onclick="switchModule('copq-chargebacks')">
               <span class="nav-text">Chargeback Requests</span>
             </a>
@@ -3002,9 +2997,14 @@
       }
 
       const supVal = document.getElementById("page-supplier-select")?.value;
+      const catVal = document.getElementById("page-category-select")?.value;
       let primarySupplier = (supVal && supVal !== "NONE" && supVal !== "ALL") ? supVal : "";
 
-      let matchedClaims = warrantyClaims.filter(c => selectedPageClaimNumbers.includes(c.claimNumber || '600064226'));
+      let matchedClaims = warrantyClaims.filter(c => {
+        if (supVal && supVal !== "NONE" && supVal !== "ALL" && c.supplier !== supVal) return false;
+        if (catVal && catVal !== "NONE" && catVal !== "ALL" && c.category !== catVal) return false;
+        return selectedPageClaimNumbers.includes(c.claimNumber || '600064226');
+      });
       if (!primarySupplier && matchedClaims.length > 0) {
         primarySupplier = matchedClaims[0].supplier || "JIN HENG INTERNATIONAL CO LTD";
       }
