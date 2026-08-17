@@ -1434,8 +1434,8 @@
 
             <!-- 6. To Date (End Date for Chargeback) -->
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">6. To Date (End Date):</label>
-              <input type="date" id="create-cb-to-date" class="input-text" style="font-weight: 600; color: #0f172a;">
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">6. To Date (End Date) <span style="color:#ef4444;">*</span>:</label>
+              <input type="date" id="create-cb-to-date" class="input-text" required style="font-weight: 600; color: #0f172a;">
             </div>
 
             <!-- 7. Coordinator (User Dropdown) (Multi-Select) -->
@@ -3487,7 +3487,20 @@
       const finalToDate = document.getElementById("create-cb-to-date")?.value || "";
 
       if (!finalName.trim()) {
-        showToast("Please enter a Chargeback Name", "info");
+        showToast("Please enter a Chargeback Name", "warning");
+        const nameInput = document.getElementById("create-cb-name");
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      if (!finalToDate || !finalToDate.trim()) {
+        showToast("Please select a To Date (End Date is mandatory)", "warning");
+        const toDateInput = document.getElementById("create-cb-to-date");
+        if (toDateInput) {
+          toDateInput.focus();
+          toDateInput.style.borderColor = "#ef4444";
+          setTimeout(() => { toDateInput.style.borderColor = ""; }, 3000);
+        }
         return;
       }
 
