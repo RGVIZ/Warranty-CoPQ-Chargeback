@@ -1304,21 +1304,20 @@
           <!-- 1. Choose Supplier -->
           <div>
             <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Choose Supplier:</label>
-            <select class="input-select" id="page-supplier-select" style="min-width: 220px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onPageFilterSupplierOrCategoryChange()">
+            <select class="input-select" id="page-supplier-select" style="min-width: 220px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onPageFilterSupplierChange()">
               <option value="NONE" selected>-- Select Supplier --</option>
               <!-- Dynamic Suppliers populated by JS -->
             </select>
           </div>
 
-          <!-- 2. Category -->
+          <!-- 2. Date Range Filters -->
           <div>
-            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Category:</label>
-            <select class="input-select" id="page-category-select" style="min-width: 160px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="onPageFilterSupplierOrCategoryChange()">
-              <option value="NONE" selected>-- Select Category --</option>
-              <option value="ALL">-- All Categories --</option>
-              <option value="Product">Product</option>
-              <option value="Labor">Labor</option>
-            </select>
+            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Start Date:</label>
+            <input type="date" id="page-start-date" class="input-select" style="font-weight:600; font-size:12px; border-color:#0284c7; padding: 5px 8px; min-width:130px;" onchange="onPageFilterSupplierChange()">
+          </div>
+          <div>
+            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">End Date:</label>
+            <input type="date" id="page-end-date" class="input-select" style="font-weight:600; font-size:12px; border-color:#0284c7; padding: 5px 8px; min-width:130px;" onchange="onPageFilterSupplierChange()">
           </div>
 
           <!-- 3. Claim Number (Multi-Select) -->
@@ -1345,18 +1344,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- 4. Currency -->
-          <div>
-            <label style="font-weight:700; font-size:12px; display:block; margin-bottom:4px; color:#0f172a;">Currency:</label>
-            <select class="input-select" id="page-currency-select" style="min-width: 120px; font-weight:600; font-size:13px; border-color:#0284c7;" onchange="renderPageInitiateChargebackTables()">
-              <option value="USD" selected>USD ($)</option>
-              <option value="EUR">EUR (€)</option>
-              <option value="GBP">GBP (£)</option>
-              <option value="CAD">CAD ($)</option>
-              <option value="INR">INR (₹)</option>
-            </select>
           </div>
 
           <div style="margin-left: auto; align-self: flex-end;">
@@ -1402,7 +1389,7 @@
             <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Review and complete the chargeback details before generating the formal request.</p>
           </div>
           <button class="btn-icon" style="color: #64748b; font-weight: 600; font-size: 13px;" onclick="cancelChargebackCreate()">
-            ✕ Cancel & Back to Warranty
+            ✕ Cancel & Back to Initiate Chargeback
           </button>
         </div>
 
@@ -1439,9 +1426,21 @@
               <input type="text" id="create-cb-date" class="input-text" style="font-weight: 600; color: #0f172a;">
             </div>
 
-            <!-- 5. Coordinator (User Dropdown) (Multi-Select) -->
+            <!-- 5. From Date (Start Date for Chargeback) -->
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">5. Coordinator (User Dropdown) (Multi-Select):</label>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">5. From Date (Start Date):</label>
+              <input type="date" id="create-cb-from-date" class="input-text" style="font-weight: 600; color: #0f172a;">
+            </div>
+
+            <!-- 6. To Date (End Date for Chargeback) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">6. To Date (End Date):</label>
+              <input type="date" id="create-cb-to-date" class="input-text" style="font-weight: 600; color: #0f172a;">
+            </div>
+
+            <!-- 7. Coordinator (User Dropdown) (Multi-Select) -->
+            <div>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">7. Coordinator (User Dropdown) (Multi-Select):</label>
               <div class="multiselect-wrapper" id="coord-multiselect-wrapper">
                 <div class="multiselect-trigger" onclick="toggleCoordDropdown(event)">
                   <span id="coord-multiselect-label">John Chen, Michael Wong</span>
@@ -1457,25 +1456,44 @@
               </div>
             </div>
 
-            <!-- 6. Supplier (Auto-filled from Warranty) (Non-Editable) (Single) -->
+            <!-- 8. Supplier (Auto-filled from Warranty) (Non-Editable) (Single) -->
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">6. Supplier (Auto-filled from Warranty) (Non-Editable):</label>
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">8. Supplier (Auto-filled from Warranty) (Non-Editable):</label>
               <input type="text" id="create-cb-supplier" class="input-text" readonly style="background: #f1f5f9; font-weight: 700; color: #0f172a; cursor: not-allowed;">
             </div>
 
-            <!-- 7. Supplier Coordinator (Auto-filled based on Claim Number) (Editable) -->
+            <!-- 9. Supplier Coordinator (Multi-Select) -->
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">7. Supplier Coordinator (Editable):</label>
-              <input type="text" id="create-cb-supplier-coord" class="input-text" style="font-weight: 600; color: #0f172a;">
-            </div>
-
-            <!-- 8. Currency (Auto-filled based on claim number) (Single) (Non-Editable) -->
-            <div>
-              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">8. Currency (Auto-filled from Warranty) (Non-Editable):</label>
-              <input type="text" id="create-cb-currency" class="input-text" readonly style="background: #f1f5f9; font-weight: 700; color: #0f172a; cursor: not-allowed;">
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">9. Supplier Coordinator (Multi-Select):</label>
+              <div class="multiselect-wrapper" id="sup-coord-multiselect-wrapper">
+                <div class="multiselect-trigger" onclick="toggleSupCoordDropdown(event)">
+                  <span id="sup-coord-multiselect-label">Li Wei, Jason Taylor</span>
+                </div>
+                <div class="multiselect-menu" id="sup-coord-multiselect-menu">
+                  <div class="multiselect-header">
+                    <span>Select Supplier Coordinators</span>
+                  </div>
+                  <div id="sup-coord-options-container" style="max-height: 160px; overflow-y: auto;">
+                    <!-- JS Populated -->
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>
+
+          <!-- Total Chargeback Cost Applicable Section -->
+          <div style="margin-top: 20px; padding: 16px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+              <span>Total Chargeback Cost Applicable:</span>
+              <span id="create-cb-total-cost" style="font-size: 16px; color: #0284c7; font-weight: 800;">$0.00</span>
+            </div>
+            <div style="display: flex; gap: 32px; font-size: 13px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+              <div><span style="color: #64748b; font-weight: 600;">Product Cost:</span> <strong id="create-cb-product-cost" style="color: #0284c7; font-weight: 800;">$0.00</strong></div>
+              <div><span style="color: #64748b; font-weight: 600;">Labor Cost:</span> <strong id="create-cb-labor-cost" style="color: #ea580c; font-weight: 800;">$0.00</strong></div>
+            </div>
+          </div>
+
         </div>
 
         <!-- PAGE BOTTOM BUTTONS -->
@@ -1624,7 +1642,7 @@
                 <thead>
                   <tr style="background: #f8fafc; border-bottom: 1px solid #cbd5e1;">
                     <th style="padding: 10px; font-size: 12px; font-weight: 700; color: #334155;">Claim Number</th>
-                    <th style="padding: 10px; font-size: 12px; font-weight: 700; color: #334155;">Component</th>
+                    <th style="padding: 10px; font-size: 12px; font-weight: 700; color: #334155;">Category</th>
                     <th style="padding: 10px; font-size: 12px; font-weight: 700; color: #334155; text-align: right;">Chargeback to Supplier</th>
                   </tr>
                 </thead>
@@ -1640,7 +1658,7 @@
         </div>
 
         <!-- SECTION 4: AMOUNT RECEIVED -->
-        <div style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+        <div id="cbd-amount-received-section" style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
           <div style="padding: 10px 14px; background: #334155; color: white; display: flex; justify-content: space-between; align-items: center;">
             <h3 style="font-size: 14px; font-weight: 800; margin: 0; color: #ffffff;">Amount Received</h3>
             <div id="cbd-amount-received-actions" style="display: flex; gap: 8px; align-items: center;">
@@ -1981,6 +1999,31 @@
             </div>
           </div>
 
+          <!-- Linked Claims Multi-Select Dropdown -->
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 4px;">
+              Linked Claims:
+            </label>
+            <div class="multiselect-wrapper" id="arm-claims-multiselect-wrapper">
+              <div class="multiselect-trigger" id="arm-claims-multiselect-trigger" onclick="toggleArmClaimsDropdown(event)">
+                <span id="arm-claims-multiselect-label">-- Select Claims --</span>
+              </div>
+              <div class="multiselect-menu" id="arm-claims-multiselect-menu">
+                <div class="multiselect-header">
+                  <span>Claim number (Category)</span>
+                  <div>
+                    <button type="button" class="multiselect-header-btn" onclick="selectAllArmClaims(true)">Select All</button>
+                    <span style="margin: 0 4px; color: #cbd5e1;">|</span>
+                    <button type="button" class="multiselect-header-btn" onclick="selectAllArmClaims(false)">Clear</button>
+                  </div>
+                </div>
+                <div id="arm-claims-options-container" style="max-height: 160px; overflow-y: auto;">
+                  <!-- JS Populated in Claim number (Category) format -->
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Description -->
           <div style="margin-bottom: 16px;">
             <label style="display: block; font-weight: 600; color: #334155; margin-bottom: 4px;">
@@ -2023,6 +2066,117 @@
       <div class="modal-footer" style="justify-content: flex-end; gap: 8px; background: #e2e8f0; padding: 10px 16px;">
         <button type="button" class="btn-primary" style="background: #38bdf8; border-color: #38bdf8; font-weight: 700; font-size: 13px; padding: 6px 18px; color: white; border-radius: 4px;" onclick="submitAddAmountReceived()">✔ Submit</button>
         <button type="button" class="btn-primary" style="background: #ea580c; border-color: #ea580c; font-weight: 700; font-size: 13px; padding: 6px 18px; color: white; border-radius: 4px;" onclick="closeModal('modal-add-amount-received')">✖ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: UPDATE TOTAL CHARGEBACK COST -->
+  <div class="modal-overlay" id="modal-update-total-chargeback">
+    <div class="modal-card" style="max-width: 680px; width: 95%; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);">
+      <div class="modal-header" style="background: #0284c7; color: white; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center;">
+        <div class="modal-title" style="font-size: 15px; font-weight: 700;">
+          Update Total Chargeback Cost
+        </div>
+        <button class="modal-close" style="color: white; opacity: 0.9; background: none; border: none; font-size: 18px; cursor: pointer;" onclick="closeModal('modal-update-total-chargeback')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px; max-height: 80vh; overflow-y: auto; background: #ffffff;">
+        
+        <!-- Total Chargeback Cost Box -->
+        <div style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px; font-weight: 700; color: #334155;">Total Chargeback Cost:</span>
+          <span id="utc-total-display" style="font-size: 18px; font-weight: 800; color: #0284c7;">$ 0.00</span>
+        </div>
+
+        <!-- Claim Number (Multi Select Dropdown) (Empty by default) -->
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 700; color: #334155; font-size: 12px; margin-bottom: 6px;">
+            Claim Number (Multi Select Dropdown):
+          </label>
+          <div class="multiselect-wrapper" id="utc-claims-multiselect-wrapper">
+            <div class="multiselect-trigger" id="utc-claims-multiselect-trigger" onclick="toggleUtcClaimsDropdown(event)">
+              <span id="utc-claims-multiselect-label">-- Select Claim Number --</span>
+            </div>
+            <div class="multiselect-menu" id="utc-claims-multiselect-menu">
+              <div class="multiselect-header">
+                <span>Select Claims to Update</span>
+                <div>
+                  <button type="button" class="multiselect-header-btn" onclick="selectAllUtcClaims(true)">Select All</button>
+                  <span style="margin: 0 4px; color: #cbd5e1;">|</span>
+                  <button type="button" class="multiselect-header-btn" onclick="selectAllUtcClaims(false)">Clear</button>
+                </div>
+              </div>
+              <div id="utc-claims-options-container" style="max-height: 160px; overflow-y: auto;">
+                <!-- JS Populated -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected Claims Table -->
+        <div style="margin-bottom: 16px;">
+          <div class="table-scroll">
+            <table class="data-table" style="margin: 0; width: 100%;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                  <th style="padding: 8px; font-size: 12px; font-weight: 700; color: #334155; text-align: center; width: 50px;">S. No</th>
+                  <th style="padding: 8px; font-size: 12px; font-weight: 700; color: #334155;">Claim Number</th>
+                  <th style="padding: 8px; font-size: 12px; font-weight: 700; color: #334155;">Category</th>
+                  <th style="padding: 8px; font-size: 12px; font-weight: 700; color: #334155; text-align: right;">Actual Chargeback</th>
+                  <th style="padding: 8px; font-size: 12px; font-weight: 700; color: #334155; text-align: right; width: 190px;">Requested Chargeback</th>
+                </tr>
+              </thead>
+              <tbody id="utc-claims-table-body">
+                <!-- JS Populated based on selected claims -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Reason for Change Multi line text field (Mandatory) -->
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 700; color: #334155; font-size: 12px; margin-bottom: 6px;">
+            Reason for Change <span style="color: #dc2626; font-weight: bold;">*</span>:
+          </label>
+          <textarea id="utc-reason" class="input-text" rows="3" placeholder="Enter mandatory reason for changing chargeback cost..." required style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px; font-size: 13px;"></textarea>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end; gap: 8px; background: #f8fafc; padding: 12px 18px; border-top: 1px solid #e2e8f0;">
+        <button type="button" class="btn-primary" style="background: #0284c7; border-color: #0284c7; font-weight: 700; font-size: 13px; padding: 6px 18px; color: white; border-radius: 4px;" onclick="submitUpdateTotalChargeback()">Update</button>
+        <button type="button" class="btn-secondary" style="font-weight: 600; font-size: 13px; padding: 6px 18px; border-radius: 4px; cursor: pointer;" onclick="closeModal('modal-update-total-chargeback')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LINKED CLAIMS POPUP -->
+  <div class="modal-overlay" id="modal-linked-claims-popup">
+    <div class="modal-card" style="max-width: 520px; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+      <div class="modal-header" style="background: #0284c7; color: white; padding: 12px 18px;">
+        <div class="modal-title" style="font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+          📎 Linked Claims
+        </div>
+        <button class="modal-close" style="color: white; opacity: 0.9;" onclick="closeModal('modal-linked-claims-popup')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 12px;" id="linked-claims-popup-ref">
+          Reference Number: -
+        </div>
+        <div class="table-scroll">
+          <table class="data-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+                <th style="padding: 10px 14px; font-size: 12px; font-weight: 700; color: #334155;">1. Claim Number</th>
+                <th style="padding: 10px 14px; font-size: 12px; font-weight: 700; color: #334155;">2. Category (Product/Labor)</th>
+              </tr>
+            </thead>
+            <tbody id="linked-claims-table-body">
+              <!-- JS populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end; background: #f8fafc; padding: 10px 16px;">
+        <button class="btn-primary" style="padding: 6px 18px; font-size: 13px; font-weight: 600;" onclick="closeModal('modal-linked-claims-popup')">Close</button>
       </div>
     </div>
   </div>
@@ -2357,7 +2511,7 @@
       if (vCbr) vCbr.style.display = moduleName === 'copq-chargebacks' ? 'block' : 'none';
       
       const vCb = document.getElementById("view-chargeback");
-      if (vCb) vCb.style.display = moduleName === 'chargeback' ? 'block' : 'none';
+      if (vCb) vCb.style.display = (moduleName === 'chargeback' || moduleName === 'copq-initiate-chargeback') ? 'block' : 'none';
 
       const vCbCreate = document.getElementById("view-chargeback-create");
       if (vCbCreate) vCbCreate.style.display = moduleName === 'chargeback-create' ? 'block' : 'none';
@@ -2385,12 +2539,13 @@
         copq: 'CoPQ Elements',
         'copq-chargebacks': 'Chargeback Requests',
         chargeback: 'Initiate Chargeback',
+        'copq-initiate-chargeback': 'Initiate Chargeback',
         'chargeback-create': 'Chargeback Create Page',
         'chargeback-detail': 'Chargeback View Page'
       };
       document.getElementById("breadcrumb-current").innerText = titles[moduleName] || 'Claims';
 
-      if (moduleName === 'chargeback') {
+      if (moduleName === 'chargeback' || moduleName === 'copq-initiate-chargeback') {
         renderPageInitiateChargebackTables();
       } else if (moduleName === 'copq-chargebacks') {
         renderCoPQChargebackRequestsTable();
@@ -2693,6 +2848,21 @@
         const coordMenu = document.getElementById("coord-multiselect-menu");
         if (coordMenu) coordMenu.classList.remove("show");
       }
+      const supCoordWrapper = document.getElementById("sup-coord-multiselect-wrapper");
+      if (supCoordWrapper && !supCoordWrapper.contains(e.target)) {
+        const supCoordMenu = document.getElementById("sup-coord-multiselect-menu");
+        if (supCoordMenu) supCoordMenu.classList.remove("show");
+      }
+      const armClaimsWrapper = document.getElementById("arm-claims-multiselect-wrapper");
+      if (armClaimsWrapper && !armClaimsWrapper.contains(e.target)) {
+        const armClaimsMenu = document.getElementById("arm-claims-multiselect-menu");
+        if (armClaimsMenu) armClaimsMenu.classList.remove("show");
+      }
+      const utcClaimsWrapper = document.getElementById("utc-claims-multiselect-wrapper");
+      if (utcClaimsWrapper && !utcClaimsWrapper.contains(e.target)) {
+        const utcClaimsMenu = document.getElementById("utc-claims-multiselect-menu");
+        if (utcClaimsMenu) utcClaimsMenu.classList.remove("show");
+      }
     });
 
     /* ==================== INITIATE CHARGEBACK PAGE LOGIC ==================== */
@@ -2708,6 +2878,51 @@
       openInitiateChargebackPage();
     }
 
+    function parseClaimDate(dateStr) {
+      if (!dateStr) return null;
+      if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+        const [d, m, y] = dateStr.split('-').map(Number);
+        return new Date(y, m - 1, d);
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        return new Date(y, m - 1, d);
+      }
+      const parsed = new Date(dateStr);
+      if (!isNaN(parsed.getTime())) {
+        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+      }
+      return null;
+    }
+
+    function getPageDateRange() {
+      const startVal = document.getElementById("page-start-date")?.value;
+      const endVal = document.getElementById("page-end-date")?.value;
+
+      let startDate = null;
+      let endDate = null;
+
+      if (startVal) {
+        const [y, m, d] = startVal.split('-').map(Number);
+        startDate = new Date(y, m - 1, d, 0, 0, 0, 0);
+      }
+      if (endVal) {
+        const [y, m, d] = endVal.split('-').map(Number);
+        endDate = new Date(y, m - 1, d, 23, 59, 59, 999);
+      }
+
+      return { startDate, endDate };
+    }
+
+    function isClaimInDateRange(claim, startDate, endDate) {
+      if (!startDate && !endDate) return true;
+      const cDate = parseClaimDate(claim.reportDate || claim.date);
+      if (!cDate) return true;
+      if (startDate && cDate < startDate) return false;
+      if (endDate && cDate > endDate) return false;
+      return true;
+    }
+
     function resetPageInitiateFilters() {
       selectedPageClaimNumbers = [];
       allPageClaimNumbers = [];
@@ -2716,9 +2931,12 @@
       
       const supSelect = document.getElementById("page-supplier-select");
       if (supSelect) supSelect.value = "NONE";
-      
-      const catSelect = document.getElementById("page-category-select");
-      if (catSelect) catSelect.value = "NONE";
+
+      const startDateEl = document.getElementById("page-start-date");
+      if (startDateEl) startDateEl.value = "";
+
+      const endDateEl = document.getElementById("page-end-date");
+      if (endDateEl) endDateEl.value = "";
       
       const currSelect = document.getElementById("page-currency-select");
       if (currSelect) currSelect.value = "USD";
@@ -2747,16 +2965,16 @@
       }
     }
 
-    function onPageFilterSupplierOrCategoryChange() {
+    function onPageFilterSupplierChange() {
       populatePageClaimNumbersDropdown();
       renderPageInitiateChargebackTables();
     }
 
     function populatePageClaimNumbersDropdown() {
       const supVal = document.getElementById("page-supplier-select")?.value || "NONE";
-      const catVal = document.getElementById("page-category-select")?.value || "NONE";
+      const { startDate, endDate } = getPageDateRange();
 
-      if (supVal === "NONE" && catVal === "NONE") {
+      if (supVal === "NONE") {
         allPageClaimNumbers = [];
         selectedPageClaimNumbers = [];
         renderPageClaimOptionsList();
@@ -2766,7 +2984,7 @@
 
       let filtered = warrantyClaims.filter(claim => {
         if (supVal !== "NONE" && supVal !== "ALL" && claim.supplier !== supVal) return false;
-        if (catVal !== "NONE" && catVal !== "ALL" && claim.category !== catVal) return false;
+        if (!isClaimInDateRange(claim, startDate, endDate)) return false;
         return true;
       });
 
@@ -2878,7 +3096,7 @@
 
     function renderPageInitiateChargebackTables() {
       const supVal = document.getElementById("page-supplier-select")?.value || "NONE";
-      const catVal = document.getElementById("page-category-select")?.value || "NONE";
+      const { startDate, endDate } = getPageDateRange();
       const currencySymbol = getPageCurrencySymbol();
       
       const container = document.getElementById("page-initiate-tables-container");
@@ -2890,7 +3108,7 @@
           <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:40px 20px; text-align:center; color:#64748b;">
             <div style="font-size:32px; margin-bottom:8px;">📋</div>
             <div style="font-weight:700; font-size:15px; color:#334155;">No Claim Numbers selected</div>
-            <div style="font-size:13px; margin-top:4px;">By default, no values are selected in filters and tables are blank. Select a Supplier, Category, or Claim Numbers above to view records.</div>
+            <div style="font-size:13px; margin-top:4px;">By default, no values are selected in filters and tables are blank. Select a Supplier or Claim Numbers above to view records.</div>
           </div>
         `;
         document.getElementById("page-initiate-records-count").innerText = "Showing 0 tables";
@@ -2900,7 +3118,7 @@
 
       let filtered = warrantyClaims.filter(claim => {
         if (supVal !== "NONE" && supVal !== "ALL" && claim.supplier !== supVal) return false;
-        if (catVal !== "NONE" && catVal !== "ALL" && claim.category !== catVal) return false;
+        if (!isClaimInDateRange(claim, startDate, endDate)) return false;
         const cn = claim.claimNumber || '600064226';
         return selectedPageClaimNumbers.includes(cn);
       });
@@ -2969,12 +3187,6 @@
               <tbody>
                 ${rowsHtml}
               </tbody>
-              <tfoot>
-                <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #e2e8f0;">
-                  <td colspan="4" style="text-align: right; padding: 10px 14px; font-size: 12px; color: #475569;">Overall Cost for Claim ${cn}:</td>
-                  <td style="text-align: right; padding: 10px 14px; font-size: 13px; color: #0f172a; font-weight:800;">${currencySymbol}${tableTotal.toLocaleString('en-US', {minimumFractionDigits:2})}</td>
-                </tr>
-              </tfoot>
             </table>
           </div>
         `;
@@ -2989,6 +3201,7 @@
     /* ==================== CHARGEBACK CREATE PAGE LOGIC ==================== */
     let pendingChargebackData = null;
     let selectedCoordinators = ["John Chen", "Michael Wong"];
+    let selectedSupplierCoordinators = ["Li Wei", "Jason Taylor"];
 
     function proceedToChargebackCreatePage() {
       if (selectedPageClaimNumbers.length === 0) {
@@ -2997,12 +3210,12 @@
       }
 
       const supVal = document.getElementById("page-supplier-select")?.value;
-      const catVal = document.getElementById("page-category-select")?.value;
+      const { startDate, endDate } = getPageDateRange();
       let primarySupplier = (supVal && supVal !== "NONE" && supVal !== "ALL") ? supVal : "";
 
       let matchedClaims = warrantyClaims.filter(c => {
         if (supVal && supVal !== "NONE" && supVal !== "ALL" && c.supplier !== supVal) return false;
-        if (catVal && catVal !== "NONE" && catVal !== "ALL" && c.category !== catVal) return false;
+        if (!isClaimInDateRange(c, startDate, endDate)) return false;
         return selectedPageClaimNumbers.includes(c.claimNumber || '600064226');
       });
       if (!primarySupplier && matchedClaims.length > 0) {
@@ -3010,13 +3223,22 @@
       }
       if (!primarySupplier) primarySupplier = "JIN HENG INTERNATIONAL CO LTD";
 
-      const currencyVal = document.getElementById("page-currency-select")?.value || "USD";
-      const currencySymbol = getPageCurrencySymbol();
+      const currencyVal = "USD";
+      const currencySymbol = "$";
       const generatedCbNumber = `CB-REQ-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       const currentDateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
       let grandTotal = matchedClaims.reduce((sum, c) => sum + parseFloat(c.debitAmount || 0), 0);
-      const supplierCoord = "Li Wei (Supplier Coordinator)";
+      let productCost = 0;
+      let laborCost = 0;
+      matchedClaims.forEach(c => {
+        const amt = parseFloat(c.debitAmount || 0);
+        if (c.category === 'Labor' || c.component === 'Labor') {
+          laborCost += amt;
+        } else {
+          productCost += amt;
+        }
+      });
 
       pendingChargebackData = {
         cbNumber: generatedCbNumber,
@@ -3025,10 +3247,12 @@
         initiationDate: currentDateStr,
         coordinators: [...selectedCoordinators],
         supplier: primarySupplier,
-        supplierCoordinator: supplierCoord,
+        supplierCoordinator: selectedSupplierCoordinators.join(", "),
         currency: currencyVal,
         currencySymbol: currencySymbol,
         grandTotal: grandTotal,
+        productCost: productCost,
+        laborCost: laborCost,
         claims: matchedClaims,
         selectedClaimNumbers: [...selectedPageClaimNumbers]
       };
@@ -3038,10 +3262,25 @@
       document.getElementById("create-cb-initiator").value = pendingChargebackData.initiator;
       document.getElementById("create-cb-date").value = pendingChargebackData.initiationDate;
       document.getElementById("create-cb-supplier").value = pendingChargebackData.supplier;
-      document.getElementById("create-cb-supplier-coord").value = pendingChargebackData.supplierCoordinator;
-      document.getElementById("create-cb-currency").value = `${pendingChargebackData.currency} (${pendingChargebackData.currencySymbol})`;
+
+      // Auto-fill From Date to current date and leave To Date empty
+      const todayObj = new Date();
+      const todayISO = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+      if (document.getElementById("create-cb-from-date")) document.getElementById("create-cb-from-date").value = todayISO;
+      if (document.getElementById("create-cb-to-date")) document.getElementById("create-cb-to-date").value = "";
+
+      if (document.getElementById("create-cb-total-cost")) {
+        document.getElementById("create-cb-total-cost").innerText = `${currencySymbol} ${grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      }
+      if (document.getElementById("create-cb-product-cost")) {
+        document.getElementById("create-cb-product-cost").innerText = `${currencySymbol} ${productCost.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      }
+      if (document.getElementById("create-cb-labor-cost")) {
+        document.getElementById("create-cb-labor-cost").innerText = `${currencySymbol} ${laborCost.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      }
 
       renderCoordinatorOptions();
+      renderSupplierCoordinatorOptions();
       switchModule('chargeback-create');
     }
 
@@ -3098,10 +3337,62 @@
       }
     }
 
+    function renderSupplierCoordinatorOptions() {
+      const container = document.getElementById("sup-coord-options-container");
+      if (!container) return;
+      const allSupCoords = ["Li Wei", "Jason Taylor", "Alex Rivera", "Kenji Sato", "Carlos Mendez"];
+      container.innerHTML = "";
+
+      allSupCoords.forEach(coord => {
+        const isChecked = selectedSupplierCoordinators.includes(coord);
+        const div = document.createElement("div");
+        div.className = "multiselect-option";
+        div.onclick = (e) => {
+          if (e.target.tagName !== 'INPUT') {
+            const chk = div.querySelector('input[type="checkbox"]');
+            if (chk) {
+              chk.checked = !chk.checked;
+              onSupCoordOptionToggle(coord, chk.checked);
+            }
+          }
+        };
+        div.innerHTML = `
+          <input type="checkbox" value="${coord}" ${isChecked ? 'checked' : ''} onchange="onSupCoordOptionToggle('${coord}', this.checked)">
+          <span>${coord}</span>
+        `;
+        container.appendChild(div);
+      });
+      updateSupCoordMultiselectLabel();
+    }
+
+    function toggleSupCoordDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("sup-coord-multiselect-menu");
+      if (menu) menu.classList.toggle("show");
+    }
+
+    function onSupCoordOptionToggle(coord, isChecked) {
+      if (isChecked) {
+        if (!selectedSupplierCoordinators.includes(coord)) selectedSupplierCoordinators.push(coord);
+      } else {
+        selectedSupplierCoordinators = selectedSupplierCoordinators.filter(c => c !== coord);
+      }
+      updateSupCoordMultiselectLabel();
+    }
+
+    function updateSupCoordMultiselectLabel() {
+      const labelEl = document.getElementById("sup-coord-multiselect-label");
+      if (!labelEl) return;
+      if (selectedSupplierCoordinators.length === 0) {
+        labelEl.innerText = "-- Select Supplier Coordinator --";
+      } else {
+        labelEl.innerText = selectedSupplierCoordinators.join(", ");
+      }
+    }
+
     function cancelChargebackCreate() {
-      pendingChargebackData = null;
-      switchModule('warranty');
-      showToast("Chargeback creation cancelled", "info");
+      switchModule('chargeback');
+      showToast("Returned to Initiate Chargeback page", "info");
     }
 
     function submitFinalChargebackCreate() {
@@ -3109,7 +3400,9 @@
 
       const finalName = document.getElementById("create-cb-name")?.value || pendingChargebackData.name;
       const finalDate = document.getElementById("create-cb-date")?.value || pendingChargebackData.initiationDate;
-      const finalSupplierCoord = document.getElementById("create-cb-supplier-coord")?.value || pendingChargebackData.supplierCoordinator;
+      const finalSupplierCoord = selectedSupplierCoordinators.join(", ");
+      const finalFromDate = document.getElementById("create-cb-from-date")?.value || "";
+      const finalToDate = document.getElementById("create-cb-to-date")?.value || "";
 
       if (!finalName.trim()) {
         showToast("Please enter a Chargeback Name", "info");
@@ -3136,6 +3429,8 @@
         number: pendingChargebackData.cbNumber,
         name: finalName,
         date: finalDate,
+        fromDate: finalFromDate,
+        toDate: finalToDate,
         initiator: pendingChargebackData.initiator,
         coordinator: selectedCoordinators.join(", "),
         supplier: pendingChargebackData.supplier,
@@ -3519,12 +3814,26 @@
         }
       }
 
+      function formatDateDisplay(dStr) {
+        if (!dStr) return "-";
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dStr)) {
+          const [y, m, d] = dStr.split('-');
+          const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
+          if (!isNaN(dateObj.getTime())) {
+            return dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          }
+        }
+        return dStr;
+      }
+
+      const rawFromDate = req.fromDate || req.date || "01 Dec 2024";
+      const rawToDate = req.toDate || req.date || "29 Jan 2026";
       if (document.getElementById("cbd-coordinator")) document.getElementById("cbd-coordinator").innerText = req.coordinator || "Norman Hemmings";
       if (document.getElementById("cbd-supplier")) document.getElementById("cbd-supplier").innerText = req.supplier || "Auto Products";
       if (document.getElementById("cbd-supplier-coordinator")) document.getElementById("cbd-supplier-coordinator").innerText = req.supplierCoordinator || "Jason Taylor";
-      if (document.getElementById("cbd-currency")) document.getElementById("cbd-currency").innerText = req.currency || "Indian Rupee";
-      if (document.getElementById("cbd-from-date")) document.getElementById("cbd-from-date").innerText = req.fromDate || "01 Dec 2024";
-      if (document.getElementById("cbd-to-date")) document.getElementById("cbd-to-date").innerText = req.toDate || req.date || "29 Jan 2026";
+      if (document.getElementById("cbd-currency")) document.getElementById("cbd-currency").innerText = req.currency || "USD";
+      if (document.getElementById("cbd-from-date")) document.getElementById("cbd-from-date").innerText = formatDateDisplay(rawFromDate);
+      if (document.getElementById("cbd-to-date")) document.getElementById("cbd-to-date").innerText = formatDateDisplay(rawToDate);
       if (document.getElementById("cbd-auth-user")) document.getElementById("cbd-auth-user").innerText = req.initiator || "Norman Hemmings";
 
       const copqBody = document.getElementById("cbd-copq-table-body");
@@ -3545,6 +3854,7 @@
             itemsToDisplay.push({
               claimNumber: cn,
               component: firstC.component || firstC.category || 'Product Line',
+              category: firstC.category || 'Product',
               overallCost: overallCost
             });
           });
@@ -3554,6 +3864,7 @@
           itemsToDisplay = [{
             claimNumber: "600064226",
             component: "Product Line",
+            category: "Product",
             overallCost: parseFloat(req.cost || 1450.00)
           }];
         }
@@ -3561,6 +3872,8 @@
         itemsToDisplay.forEach(item => {
           const claimNumVal = item.claimNumber || req.number || '600064226';
           const compVal = item.component || item.copqElement || item.category || 'Product Line';
+          const catVal = item.category || ((compVal === 'Labor' || compVal === 'Labour') ? 'Labor' : 'Product');
+          const catBadgeClass = (catVal === 'Labor' || catVal === 'Labour') ? 'badge-orange' : 'badge-blue';
           
           let costVal = 0;
           if (item.overallCost !== undefined && item.overallCost !== null && !isNaN(parseFloat(item.overallCost)) && parseFloat(item.overallCost) > 0) {
@@ -3585,7 +3898,7 @@
           tr.style.cssText = "border-bottom: 1px solid #e2e8f0;";
           tr.innerHTML = `
             <td style="padding: 10px; font-size: 13px; font-weight: 700; color: #0284c7;">${claimNumVal}</td>
-            <td style="padding: 10px; font-size: 13px; color: #334155;"><span class="badge badge-gray">${compVal}</span></td>
+            <td style="padding: 10px; font-size: 13px; color: #334155;"><span class="badge ${catBadgeClass}">${catVal}</span></td>
             <td style="padding: 10px; font-size: 13px; font-weight: 700; color: #0f172a; text-align: right;">${currSymbol}${costVal.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
           `;
           copqBody.appendChild(tr);
@@ -3599,7 +3912,16 @@
         req.cost = calculatedTotalCost;
       }
 
-      // Render Amount Received Section - Add button ONLY displayed once Chargeback initiated (status is NOT "New")
+      // Render Amount Received Section - Section & Add button ONLY displayed once Chargeback initiated (status is NOT "New")
+      const armSection = document.getElementById("cbd-amount-received-section");
+      if (armSection) {
+        if (req.status === "New") {
+          armSection.style.display = "none";
+        } else {
+          armSection.style.display = "block";
+        }
+      }
+
       const armActions = document.getElementById("cbd-amount-received-actions");
       if (armActions) {
         if (req.status === "New") {
@@ -3672,12 +3994,13 @@
               <table class="data-table" style="margin: 0; width: 100%;">
                 <thead>
                   <tr style="background: #e2e8f0; border-bottom: 1px solid #cbd5e1;">
-                    <th style="padding: 8px; font-size: 12px; font-weight: 700; width: 50px; text-align: center;">S.No.</th>
+                    <th style="padding: 8px; font-size: 12px; font-weight: 700; width: 50px; text-align: center;">S. No</th>
                     <th style="padding: 8px; font-size: 12px; font-weight: 700;">Reference Number</th>
                     <th style="padding: 8px; font-size: 12px; font-weight: 700;">Amount Received</th>
-                    <th style="padding: 8px; font-size: 12px; font-weight: 700;">Added/ Updated by</th>
+                    <th style="padding: 8px; font-size: 12px; font-weight: 700;">Added/Updated By</th>
+                    <th style="padding: 8px; font-size: 12px; font-weight: 700; text-align: center;">Linked Claims</th>
                     <th style="padding: 8px; font-size: 12px; font-weight: 700;">Date</th>
-                    <th style="padding: 8px; font-size: 12px; font-weight: 700; text-align: center; width: 80px;">Actions</th>
+                    <th style="padding: 8px; font-size: 12px; font-weight: 700; text-align: center; width: 110px;">Action (Edit/History)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -3685,11 +4008,15 @@
                     <tr style="border-bottom: 1px solid #f1f5f9;">
                       <td style="padding: 8px; font-size: 12px; font-weight: 700; text-align: center;">${index + 1}</td>
                       <td style="padding: 8px; font-size: 12px; font-weight: 600; color: #334155;">${arm.refNum}</td>
-                      <td style="padding: 8px; font-size: 12px; font-weight: 600; color: #0f172a;">${currSymbol}${Number(arm.amount).toFixed(6)}</td>
+                      <td style="padding: 8px; font-size: 12px; font-weight: 600; color: #0f172a;">${currSymbol}${Number(arm.amount).toFixed(2)}</td>
                       <td style="padding: 8px; font-size: 12px; color: #334155;">${arm.addedBy || 'Norman Hemmings'}</td>
+                      <td style="padding: 8px; text-align: center;">
+                        <button style="border: 1px solid #bae6fd; background: #e0f2fe; color: #0284c7; cursor: pointer; padding: 3px 8px; border-radius: 4px; font-size: 13px;" onclick="openLinkedClaimsPopup(${index})" title="View Linked Claims">📎</button>
+                      </td>
                       <td style="padding: 8px; font-size: 12px; color: #64748b;">${arm.date}</td>
                       <td style="padding: 8px; text-align: center;">
-                        <button style="border:none; background:transparent; cursor:pointer; color:#0284c7; font-size:13px; margin-right:6px;" onclick="showToast('Edit record enabled', 'info')" title="Edit">✏️</button>
+                        <button style="border:none; background:transparent; cursor:pointer; color:#0284c7; font-size:13px; margin-right:4px;" onclick="showToast('Edit record enabled', 'info')" title="Edit">✏️</button>
+                        <button style="border:none; background:transparent; cursor:pointer; color:#64748b; font-size:13px; margin-right:4px;" onclick="showToast('History log viewed', 'info')" title="History">📜</button>
                         <button style="border:none; background:transparent; cursor:pointer; color:#dc2626; font-size:13px;" onclick="deleteAmountReceivedRecord(${index})" title="Delete">🗑️</button>
                       </td>
                     </tr>
@@ -3723,20 +4050,147 @@
       }
     }
 
+    let selectedArmClaims = [];
+
     function openAddAmountReceivedModal() {
       if (!currentViewedChargebackNumber) {
         showToast("No active chargeback request selected", "info");
         return;
       }
       const req = chargebackRequestsList.find(r => r.number === currentViewedChargebackNumber);
-      if (req && req.status === "New") {
+      if (!req) return;
+      if (req.status === "New") {
         showToast("Please initiate chargeback first before adding received amount", "info");
         return;
       }
       document.getElementById("arm-ref-num").value = "";
       document.getElementById("arm-amount").value = "";
-      document.getElementById("arm-description").value = "";
+      if (document.getElementById("arm-description")) document.getElementById("arm-description").value = "";
+
+      populateArmClaimsDropdown(req);
       openModal("modal-add-amount-received");
+    }
+
+    function populateArmClaimsDropdown(req) {
+      const container = document.getElementById("arm-claims-options-container");
+      if (!container) return;
+      container.innerHTML = "";
+
+      let claimList = [];
+      if (req.uniqueClaims && req.uniqueClaims.length > 0) {
+        req.uniqueClaims.forEach(uc => {
+          const cn = uc.claimNumber || '600064226';
+          const matching = warrantyClaims.filter(c => c.claimNumber === cn);
+          if (matching.length > 0) {
+            matching.forEach(mc => {
+              const cat = mc.category || ((mc.component === 'Labor' || mc.component === 'Labour') ? 'Labor' : 'Product');
+              claimList.push({ claimNumber: cn, category: cat, label: `${cn} (${cat})` });
+            });
+          } else {
+            const comp = uc.component || uc.copqElement || 'Product';
+            const cat = (comp === 'Labor' || comp === 'Labour') ? 'Labor' : 'Product';
+            claimList.push({ claimNumber: cn, category: cat, label: `${cn} (${cat})` });
+          }
+        });
+      } else if (req.claimNumber) {
+        const cns = req.claimNumber.split(',').map(s => s.trim()).filter(Boolean);
+        cns.forEach(cn => {
+          const matching = warrantyClaims.filter(c => c.claimNumber === cn);
+          if (matching.length > 0) {
+            matching.forEach(mc => {
+              const cat = mc.category || ((mc.component === 'Labor' || mc.component === 'Labour') ? 'Labor' : 'Product');
+              claimList.push({ claimNumber: cn, category: cat, label: `${cn} (${cat})` });
+            });
+          } else {
+            claimList.push({ claimNumber: cn, category: 'Product', label: `${cn} (Product)` });
+          }
+        });
+      }
+
+      // De-duplicate options by label
+      const uniqueOptions = [];
+      const seenLabels = new Set();
+      claimList.forEach(item => {
+        if (!seenLabels.has(item.label)) {
+          seenLabels.add(item.label);
+          uniqueOptions.push(item);
+        }
+      });
+
+      if (uniqueOptions.length === 0) {
+        uniqueOptions.push({ claimNumber: '600064226', category: 'Product', label: '600064226 (Product)' });
+        uniqueOptions.push({ claimNumber: '600064226', category: 'Labor', label: '600064226 (Labor)' });
+      }
+
+      selectedArmClaims = [];
+
+      uniqueOptions.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "multiselect-option";
+        div.onclick = (e) => {
+          if (e.target.tagName !== 'INPUT') {
+            const chk = div.querySelector('input[type="checkbox"]');
+            if (chk) {
+              chk.checked = !chk.checked;
+              onArmClaimOptionToggle(opt, chk.checked);
+            }
+          }
+        };
+        div.innerHTML = `
+          <input type="checkbox" value="${opt.label}" onchange="onArmClaimOptionToggle(${JSON.stringify(opt).replace(/"/g, '&quot;')}, this.checked)">
+          <span>${opt.label}</span>
+        `;
+        container.appendChild(div);
+      });
+
+      updateArmClaimsMultiselectLabel();
+    }
+
+    function toggleArmClaimsDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("arm-claims-multiselect-menu");
+      if (menu) menu.classList.toggle("show");
+    }
+
+    function onArmClaimOptionToggle(optObj, isChecked) {
+      if (isChecked) {
+        if (!selectedArmClaims.some(o => o.label === optObj.label)) {
+          selectedArmClaims.push(optObj);
+        }
+      } else {
+        selectedArmClaims = selectedArmClaims.filter(o => o.label !== optObj.label);
+      }
+      updateArmClaimsMultiselectLabel();
+    }
+
+    function selectAllArmClaims(selectAll) {
+      const container = document.getElementById("arm-claims-options-container");
+      if (!container) return;
+      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(chk => {
+        chk.checked = selectAll;
+      });
+      if (selectAll) {
+        selectedArmClaims = Array.from(checkboxes).map(chk => {
+          const label = chk.value;
+          const cn = label.split('(')[0].trim();
+          const cat = label.includes('(Labor)') ? 'Labor' : 'Product';
+          return { claimNumber: cn, category: cat, label: label };
+        });
+      } else {
+        selectedArmClaims = [];
+      }
+      updateArmClaimsMultiselectLabel();
+    }
+
+    function updateArmClaimsMultiselectLabel() {
+      const labelEl = document.getElementById("arm-claims-multiselect-label");
+      if (!labelEl) return;
+      if (selectedArmClaims.length === 0) {
+        labelEl.innerText = "-- Select Linked Claims --";
+      } else {
+        labelEl.innerText = selectedArmClaims.map(o => o.label).join(", ");
+      }
     }
 
     function submitAddAmountReceived() {
@@ -3757,14 +4211,15 @@
       if (!req.amountReceivedList) req.amountReceivedList = [];
 
       const d = new Date();
-      const dateStr = `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()} ${d.toLocaleTimeString()}`;
+      const dateStr = `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`;
 
       req.amountReceivedList.push({
         id: Date.now(),
         refNum: refNum,
         amount: amtVal,
         addedBy: "Norman Hemmings",
-        date: dateStr
+        date: dateStr,
+        linkedClaims: [...selectedArmClaims]
       });
 
       // Calculate total received & update status based on Pending Amount
@@ -3783,6 +4238,47 @@
       closeModal("modal-add-amount-received");
       showToast("Amount Received record added successfully!", "success");
       viewChargebackRequestDetail(req.number);
+    }
+
+    function openLinkedClaimsPopup(index) {
+      const req = chargebackRequestsList.find(r => r.number === currentViewedChargebackNumber);
+      if (!req || !req.amountReceivedList || !req.amountReceivedList[index]) return;
+
+      const arm = req.amountReceivedList[index];
+      const refEl = document.getElementById("linked-claims-popup-ref");
+      if (refEl) refEl.innerText = `Reference Number: ${arm.refNum}`;
+
+      const tbody = document.getElementById("linked-claims-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      let linked = arm.linkedClaims || [];
+      if (linked.length === 0) {
+        if (req.uniqueClaims && req.uniqueClaims.length > 0) {
+          linked = req.uniqueClaims.map(uc => ({
+            claimNumber: uc.claimNumber || '600064226',
+            category: (uc.component === 'Labor' || uc.component === 'Labour') ? 'Labor' : 'Product'
+          }));
+        } else {
+          linked = [{ claimNumber: req.claimNumber || '600064226', category: 'Product' }];
+        }
+      }
+
+      linked.forEach(item => {
+        const cn = item.claimNumber || (typeof item === 'string' ? item.split('(')[0].trim() : '600064226');
+        const cat = item.category || (typeof item === 'string' && item.includes('(Labor)') ? 'Labor' : 'Product');
+        const catBadge = (cat === 'Labor' || cat === 'Labour') ? 'badge-orange' : 'badge-blue';
+
+        const tr = document.createElement("tr");
+        tr.style.cssText = "border-bottom: 1px solid #f1f5f9;";
+        tr.innerHTML = `
+          <td style="padding: 10px 14px; font-weight: 700; color: #0284c7; font-size: 13px;">${cn}</td>
+          <td style="padding: 10px 14px; font-size: 12px;"><span class="badge ${catBadge}">${cat}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      openModal("modal-linked-claims-popup");
     }
 
     function deleteAmountReceivedRecord(index) {
@@ -3829,6 +4325,238 @@
         onSupplierFilterChange();
         showToast(`Filtered chargeback workspace for supplier: ${claim.supplier}`, "info");
       }
+    }
+
+    /* ==================== UPDATE TOTAL CHARGEBACK COST LOGIC ==================== */
+    let utcModalClaimItems = [];
+    let selectedUtcClaimKeys = [];
+
+    function openUpdateTotalChargebackModal() {
+      if (!currentViewedChargebackNumber) {
+        showToast("No active chargeback request selected", "info");
+        return;
+      }
+      const req = chargebackRequestsList.find(r => r.number === currentViewedChargebackNumber);
+      if (!req) return;
+
+      utcModalClaimItems = [];
+      if (req.uniqueClaims && req.uniqueClaims.length > 0) {
+        req.uniqueClaims.forEach((uc, idx) => {
+          const cn = uc.claimNumber || '600064226';
+          const comp = uc.component || uc.category || 'Product';
+          const cat = uc.category || ((comp === 'Labor' || comp === 'Labour') ? 'Labor' : 'Product');
+          const actual = uc.actualCost !== undefined ? parseFloat(uc.actualCost) : parseFloat(uc.overallCost || req.cost || 1450);
+          const requested = parseFloat(uc.overallCost !== undefined ? uc.overallCost : actual);
+          
+          utcModalClaimItems.push({
+            key: `${cn}-${cat}-${idx}`,
+            claimNumber: cn,
+            category: cat,
+            actualChargeback: actual,
+            requestedChargeback: requested
+          });
+        });
+      } else if (req.claimNumber) {
+        const cnList = req.claimNumber.split(',').map(s => s.trim()).filter(Boolean);
+        cnList.forEach((cn, idx) => {
+          const matching = warrantyClaims.filter(c => (c.claimNumber || '600064226') === cn);
+          if (matching.length > 0) {
+            matching.forEach((mc, mIdx) => {
+              const cat = mc.category || ((mc.component === 'Labor' || mc.component === 'Labour') ? 'Labor' : 'Product');
+              const actual = parseFloat(mc.debitAmount || 0) || 1450.00;
+              utcModalClaimItems.push({
+                key: `${cn}-${cat}-${idx}-${mIdx}`,
+                claimNumber: cn,
+                category: cat,
+                actualChargeback: actual,
+                requestedChargeback: actual
+              });
+            });
+          } else {
+            const actual = parseFloat(req.cost || 1450.00);
+            utcModalClaimItems.push({
+              key: `${cn}-Product-${idx}`,
+              claimNumber: cn,
+              category: 'Product',
+              actualChargeback: actual,
+              requestedChargeback: actual
+            });
+          }
+        });
+      }
+
+      if (utcModalClaimItems.length === 0) {
+        utcModalClaimItems = [
+          { key: '600064226-Product-0', claimNumber: '600064226', category: 'Product', actualChargeback: 1000.00, requestedChargeback: 1000.00 },
+          { key: '600064226-Labor-1', claimNumber: '600064226', category: 'Labor', actualChargeback: 450.00, requestedChargeback: 450.00 }
+        ];
+      }
+
+      selectedUtcClaimKeys = [];
+      const reasonEl = document.getElementById("utc-reason");
+      if (reasonEl) reasonEl.value = "";
+
+      populateUtcClaimsDropdown();
+      renderUtcClaimsTable();
+      updateUtcTotalDisplay();
+      openModal("modal-update-total-chargeback");
+    }
+
+    function populateUtcClaimsDropdown() {
+      const container = document.getElementById("utc-claims-options-container");
+      if (!container) return;
+      container.innerHTML = "";
+
+      utcModalClaimItems.forEach(item => {
+        const isChecked = selectedUtcClaimKeys.includes(item.key);
+        const label = `${item.claimNumber} (${item.category})`;
+        const div = document.createElement("div");
+        div.className = "multiselect-option";
+        div.onclick = (e) => {
+          if (e.target.tagName !== 'INPUT') {
+            const chk = div.querySelector('input[type="checkbox"]');
+            if (chk) {
+              chk.checked = !chk.checked;
+              onUtcClaimOptionToggle(item.key, chk.checked);
+            }
+          }
+        };
+        div.innerHTML = `
+          <input type="checkbox" value="${item.key}" ${isChecked ? 'checked' : ''} onchange="onUtcClaimOptionToggle('${item.key}', this.checked)">
+          <span>${label}</span>
+        `;
+        container.appendChild(div);
+      });
+
+      updateUtcClaimsMultiselectLabel();
+    }
+
+    function toggleUtcClaimsDropdown(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("utc-claims-multiselect-menu");
+      if (menu) menu.classList.toggle("show");
+    }
+
+    function onUtcClaimOptionToggle(key, isChecked) {
+      if (isChecked) {
+        if (!selectedUtcClaimKeys.includes(key)) selectedUtcClaimKeys.push(key);
+      } else {
+        selectedUtcClaimKeys = selectedUtcClaimKeys.filter(k => k !== key);
+      }
+      updateUtcClaimsMultiselectLabel();
+      renderUtcClaimsTable();
+    }
+
+    function selectAllUtcClaims(doSelectAll) {
+      if (doSelectAll) {
+        selectedUtcClaimKeys = utcModalClaimItems.map(i => i.key);
+      } else {
+        selectedUtcClaimKeys = [];
+      }
+      populateUtcClaimsDropdown();
+      renderUtcClaimsTable();
+    }
+
+    function updateUtcClaimsMultiselectLabel() {
+      const labelEl = document.getElementById("utc-claims-multiselect-label");
+      if (!labelEl) return;
+      if (selectedUtcClaimKeys.length === 0) {
+        labelEl.innerText = "-- Select Claim Number --";
+      } else {
+        const selectedLabels = utcModalClaimItems
+          .filter(i => selectedUtcClaimKeys.includes(i.key))
+          .map(i => `${i.claimNumber} (${i.category})`);
+        labelEl.innerText = selectedLabels.join(", ");
+      }
+    }
+
+    function renderUtcClaimsTable() {
+      const tbody = document.getElementById("utc-claims-table-body");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (selectedUtcClaimKeys.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 13px;">
+              Please select claim numbers from the dropdown above to view and update requested chargeback amounts.
+            </td>
+          </tr>
+        `;
+        updateUtcTotalDisplay();
+        return;
+      }
+
+      const selectedItems = utcModalClaimItems.filter(i => selectedUtcClaimKeys.includes(i.key));
+      selectedItems.forEach((item, index) => {
+        const catBadgeClass = (item.category === 'Labor' || item.category === 'Labour') ? 'badge-orange' : 'badge-blue';
+        const tr = document.createElement("tr");
+        tr.style.cssText = "border-bottom: 1px solid #f1f5f9;";
+        tr.innerHTML = `
+          <td style="padding: 8px; font-size: 12px; font-weight: 700; text-align: center;">${index + 1}</td>
+          <td style="padding: 8px; font-size: 13px; font-weight: 700; color: #0284c7;">${item.claimNumber}</td>
+          <td style="padding: 8px; font-size: 12px;"><span class="badge ${catBadgeClass}">${item.category}</span></td>
+          <td style="padding: 8px; font-size: 13px; font-weight: 600; color: #475569; text-align: right;">$ ${item.actualChargeback.toFixed(2)}</td>
+          <td style="padding: 8px; text-align: right;">
+            <input type="number" step="0.01" class="input-text" style="width: 140px; font-weight: 700; text-align: right; border: 1px solid #0284c7; background: #f0f9ff; padding: 4px 8px; font-size: 13px; border-radius: 4px;" value="${item.requestedChargeback}" oninput="onUtcRequestedAmountInput('${item.key}', this.value)">
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateUtcTotalDisplay();
+    }
+
+    function onUtcRequestedAmountInput(key, valStr) {
+      const item = utcModalClaimItems.find(i => i.key === key);
+      if (item) {
+        const newAmt = parseFloat(valStr);
+        item.requestedChargeback = isNaN(newAmt) ? 0 : newAmt;
+      }
+      updateUtcTotalDisplay();
+    }
+
+    function updateUtcTotalDisplay() {
+      const totalDisplay = document.getElementById("utc-total-display");
+      if (!totalDisplay) return;
+      const grandTotal = utcModalClaimItems.reduce((sum, item) => sum + (parseFloat(item.requestedChargeback) || 0), 0);
+      totalDisplay.innerText = `$ ${grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+
+    function submitUpdateTotalChargeback() {
+      const reasonVal = document.getElementById("utc-reason")?.value.trim();
+      if (!reasonVal) {
+        showToast("Reason for Change is required", "warning");
+        return;
+      }
+
+      const req = chargebackRequestsList.find(r => r.number === currentViewedChargebackNumber);
+      if (!req) return;
+
+      const newTotal = utcModalClaimItems.reduce((sum, item) => sum + (parseFloat(item.requestedChargeback) || 0), 0);
+      req.cost = newTotal;
+
+      req.uniqueClaims = utcModalClaimItems.map(i => ({
+        claimNumber: i.claimNumber,
+        category: i.category,
+        component: i.category,
+        overallCost: i.requestedChargeback,
+        actualCost: i.actualChargeback
+      }));
+
+      req.history = req.history || [];
+      req.history.push({
+        date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+        action: 'Total Chargeback Cost Updated',
+        newTotal: newTotal,
+        reason: reasonVal,
+        updatedBy: 'Norman Hemmings'
+      });
+
+      saveState();
+      closeModal("modal-update-total-chargeback");
+      showToast("Total Chargeback Cost updated successfully", "success");
+      viewChargebackRequestDetail(req.number);
     }
 
     /* ==================== MODALS & FORM LOGIC ==================== */
